@@ -1,0 +1,106 @@
+/**
+ * TableBody.css
+ * Styles for the table body, rows, cells, and row selection
+ */
+
+/* Body container */
+.gcds-table__body {
+  background-color: #FFFFFF;
+}
+
+/* Row styles */
+.gcds-table__row {
+  transition: background-color 0.2s ease;
+}
+
+.gcds-table__row:not(:last-child) {
+  border-bottom: 1px solid var(--gcds-border-light);
+}
+
+/* Striped row styles */
+.gcds-table__row--striped {
+  background-color: var(--gcds-background-light);
+}
+
+/* Cell styles */
+.gcds-table__cell {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Cell as header */
+.gcds-table__cell--header {
+  font-weight: var(--gcds-font-weights-semibold);
+}
+
+/* Row hover effect */
+.gcds-table--hover .gcds-table__row:hover {
+  background-color: var(--gcds-background-hover);
+  cursor: default;
+}
+
+/* Row selection styles */
+.gcds-table__row--selected {
+  background-color: var(--gcds-background-selected);
+  font-weight: var(--gcds-font-weights-semibold);
+}
+
+.gcds-table__row--striped.gcds-table__row--selected {
+  background-color: var(--gcds-background-selected);
+}
+
+/* Selection cell */
+.gcds-table__cell--selection {
+  width: 40px;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Color theme variations for striped rows */
+.gcds-table--blue.gcds-table--striped .gcds-table__row:nth-child(even) {
+  background-color: var(--gcds-color-blue-50);
+}
+
+.gcds-table--green.gcds-table--striped .gcds-table__row:nth-child(even) {
+  background-color: var(--gcds-color-green-50);
+}
+
+.gcds-table--red.gcds-table--striped .gcds-table__row:nth-child(even) {
+  background-color: var(--gcds-color-red-50);
+}
+
+.gcds-table--purple.gcds-table--striped .gcds-table__row:nth-child(even) {
+  background-color: var(--gcds-color-purple-50);
+}
+
+/* Expandable rows */
+.gcds-table__expand-cell {
+  width: 40px;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.gcds-table__expand-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.gcds-table__expand-button--expanded {
+  transform: rotate(180deg);
+}
+
+.gcds-table__expanded-row {
+  background-color: var(--gcds-background-light);
+}
+
+.gcds-table__expanded-content {
+  padding: 1rem;
+  background-color: var(--gcds-background-light);
+  border-top: 1px solid var(--gcds-border-light);
+  border-bottom: 1px solid var(--gcds-border-light);
+} 

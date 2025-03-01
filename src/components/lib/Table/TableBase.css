@@ -1,0 +1,163 @@
+/**
+ * TableBase.css
+ * Core table styles that serve as the foundation for the Table component
+ */
+
+/* Wrapper for responsive behavior */
+.gcds-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  background-color: #FFFFFF;
+}
+
+/* Core table */
+.gcds-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-medium);
+  line-height: var(--gcds-line-heights-default);
+  color: var(--gcds-text-primary);
+  margin-bottom: 1rem;
+}
+
+/* Table caption */
+.gcds-table__caption {
+  text-align: left;
+  padding: 0.5rem 0;
+  font-size: var(--gcds-font-sizes-text-large);
+  font-weight: var(--gcds-font-weights-semibold);
+  margin-bottom: 0.5rem;
+  caption-side: top;
+}
+
+/* Border variations */
+.gcds-table--horizontal-borders .gcds-table__row {
+  border-bottom: 1px solid var(--gcds-border-default);
+}
+
+.gcds-table--vertical-borders .gcds-table__header,
+.gcds-table--vertical-borders .gcds-table__cell {
+  border-right: 1px solid var(--gcds-border-default);
+}
+
+.gcds-table--vertical-borders .gcds-table__header:last-child,
+.gcds-table--vertical-borders .gcds-table__cell:last-child {
+  border-right: none;
+}
+
+/* Cell borders variation */
+.gcds-table--cell-borders .gcds-table__header,
+.gcds-table--cell-borders .gcds-table__cell {
+  border: 1px solid var(--gcds-border-default);
+}
+
+/* Grid style for cell borders */
+.gcds-table--cell-borders {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.gcds-table--cell-borders .gcds-table__header {
+  border: 1px solid var(--gcds-border-default);
+}
+
+.gcds-table--cell-borders {
+  border: 1px solid var(--gcds-border-default);
+}
+
+/* Corner styles for cell borders */
+.gcds-table--cell-borders thead tr:first-child th:first-child {
+  border-top-left-radius: 4px;
+}
+
+.gcds-table--cell-borders thead tr:first-child th:last-child {
+  border-top-right-radius: 4px;
+}
+
+.gcds-table--cell-borders tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 4px;
+}
+
+.gcds-table--cell-borders tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 4px;
+}
+
+/* Cell border styling */
+.gcds-table--cell-borders th,
+.gcds-table--cell-borders td {
+  border: 1px solid var(--gcds-border-default);
+  border-top: none;
+  border-left: none;
+}
+
+.gcds-table--cell-borders thead th {
+  border-top: 1px solid var(--gcds-border-default);
+}
+
+/* Table density variations */
+.gcds-table--compact .gcds-table__header,
+.gcds-table--compact .gcds-table__cell {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--gcds-font-sizes-text-small);
+}
+
+.gcds-table--dense .gcds-table__header,
+.gcds-table--dense .gcds-table__cell {
+  padding: 0.25rem 0.5rem;
+  font-size: var(--gcds-font-sizes-text-xsmall);
+}
+
+/* Card-style table */
+.gcds-table--card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.gcds-table--card .gcds-table__caption {
+  padding: 1rem;
+  background-color: var(--gcds-background-light);
+  border-bottom: 1px solid var(--gcds-border-default);
+}
+
+.gcds-table--card .gcds-table__footer {
+  padding: 1rem;
+  background-color: var(--gcds-background-light);
+  border-top: 1px solid var(--gcds-border-default);
+}
+
+/* Shadow effect */
+.gcds-table--shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--gcds-border-light);
+}
+
+/* Empty state message for tables without data */
+.gcds-table__empty-state {
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--gcds-background-light);
+  color: var(--gcds-text-secondary);
+}
+
+.gcds-table__empty-icon {
+  font-size: 2rem;
+  color: var(--gcds-icon-muted);
+  margin-bottom: 0.5rem;
+}
+
+.gcds-table__empty-message {
+  font-size: var(--gcds-font-sizes-text-large);
+  font-weight: var(--gcds-font-weights-semibold);
+  margin-bottom: 0.5rem;
+}
+
+.gcds-table__empty-description {
+  font-size: var(--gcds-font-sizes-text-medium);
+  color: var(--gcds-text-secondary);
+} 

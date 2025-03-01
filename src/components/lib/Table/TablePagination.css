@@ -1,0 +1,96 @@
+/**
+ * TablePagination.css
+ * Styles for pagination controls and page navigation
+ */
+
+/* Pagination container */
+.gcds-table__pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Pagination component */
+.gcds-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pagination list */
+.gcds-pagination__list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 0.25rem;
+}
+
+/* List item */
+.gcds-pagination__item {
+  margin: 0;
+}
+
+/* Pagination buttons */
+.gcds-pagination__button {
+  border: 1px solid var(--gcds-border-default);
+  background-color: #FFFFFF;
+  padding: 0.5rem 0.75rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-small);
+  color: var(--gcds-text-primary);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.gcds-pagination__button:hover {
+  background-color: var(--gcds-background-hover);
+  border-color: var(--gcds-border-active);
+}
+
+.gcds-pagination__button:focus {
+  outline: 2px solid var(--gcds-focus-outline);
+  outline-offset: 2px;
+}
+
+/* Current page indicator */
+.gcds-pagination__button--current {
+  background-color: var(--gcds-color-blue-500);
+  color: #FFFFFF;
+  border-color: var(--gcds-color-blue-500);
+  font-weight: var(--gcds-font-weights-semibold);
+}
+
+/* Previous and next buttons */
+.gcds-pagination__button--prev,
+.gcds-pagination__button--next {
+  padding: 0.5rem 1rem;
+}
+
+/* Disabled state */
+.gcds-pagination__button:disabled {
+  background-color: var(--gcds-background-disabled);
+  border-color: var(--gcds-border-disabled);
+  color: var(--gcds-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Ellipsis indicator */
+.gcds-pagination__ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  font-size: var(--gcds-font-sizes-text-small);
+  color: var(--gcds-text-secondary);
+} 

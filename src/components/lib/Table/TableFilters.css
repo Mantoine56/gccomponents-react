@@ -1,0 +1,225 @@
+/**
+ * TableFilters.css
+ * Styles for filtering UI and dropdown components
+ */
+
+/* Filter container */
+.gcds-table__filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--gcds-background-light);
+  border-radius: 4px;
+}
+
+/* Filter row */
+.gcds-table__filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Filter field container */
+.gcds-table__filter-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Filter actions container */
+.gcds-table__filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+/* Header filter icon */
+.gcds-table__header-filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.gcds-table__header-filter-icon:hover,
+.gcds-table__header-filter-icon--active {
+  opacity: 1;
+}
+
+/* Filter dropdown menu */
+.gcds-table__filter-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 250px;
+  z-index: 100;
+  background-color: #FFFFFF;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--gcds-border-default);
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Filter dropdown header */
+.gcds-table__filter-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gcds-border-light);
+}
+
+/* Filter dropdown title */
+.gcds-table__filter-dropdown-title {
+  font-weight: var(--gcds-font-weights-semibold);
+  font-size: var(--gcds-font-sizes-text-small);
+}
+
+/* Close button for filter dropdown */
+.gcds-table__filter-dropdown-close {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.gcds-table__filter-dropdown-close:hover {
+  background-color: var(--gcds-background-hover);
+}
+
+/* Filter input group */
+.gcds-table__filter-input-group {
+  margin-bottom: 0.75rem;
+}
+
+/* Filter input */
+.gcds-table__filter-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--gcds-border-default);
+  border-radius: 4px;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-small);
+}
+
+/* Filter action buttons container */
+.gcds-table__filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Filter buttons */
+.gcds-table__filter-button {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-small);
+  border: 1px solid var(--gcds-border-default);
+}
+
+/* Apply filter button */
+.gcds-table__filter-button--apply {
+  background-color: var(--gcds-color-blue-500);
+  color: #FFFFFF;
+  border-color: var(--gcds-color-blue-500);
+}
+
+.gcds-table__filter-button--apply:hover {
+  background-color: var(--gcds-color-blue-600);
+}
+
+.gcds-table__filter-button--clear:hover {
+  background-color: var(--gcds-background-hover);
+}
+
+/* Column filters container */
+.gcds-table__column-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--gcds-background-light);
+  border-radius: 4px;
+  border: 1px solid var(--gcds-border-light);
+}
+
+/* Individual column filter */
+.gcds-table__column-filter {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Column filter label */
+.gcds-table__column-filter-label {
+  font-weight: var(--gcds-font-weights-semibold);
+  font-size: var(--gcds-font-sizes-text-small);
+  color: var(--gcds-text-primary);
+}
+
+/* Column filter input */
+.gcds-table__column-filter-input {
+  padding: 0.5rem;
+  border: 1px solid var(--gcds-border-default);
+  border-radius: 4px;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-small);
+}
+
+.gcds-table__column-filter-input:focus {
+  border-color: var(--gcds-border-active);
+  outline: 2px solid var(--gcds-focus-outline);
+}
+
+/* Column filter select */
+.gcds-table__column-filter-select {
+  padding: 0.5rem;
+  border: 1px solid var(--gcds-border-default);
+  border-radius: 4px;
+  font-family: var(--gcds-font-families-body);
+  font-size: var(--gcds-font-sizes-text-small);
+  background-color: #FFFFFF;
+}
+
+/* Position for header filter icon and dropdown */
+.gcds-table__header--filterable {
+  position: relative;
+}
+
+/* Badge to indicate active filters */
+.gcds-table__filter-badge-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--gcds-color-red-500);
+  color: #FFFFFF;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--gcds-font-weights-bold);
+} 

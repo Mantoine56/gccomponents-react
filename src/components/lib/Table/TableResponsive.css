@@ -1,0 +1,73 @@
+/**
+ * TableResponsive.css
+ * Styles for responsive behavior of tables on small screens
+ */
+
+/* Responsive wrapper */
+@media (max-width: 768px) {
+  .gcds-table--responsive {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Stack layout for mobile */
+@media (max-width: 768px) {
+  .gcds-table--stack {
+    display: block;
+    width: 100%;
+  }
+  
+  .gcds-table--stack .gcds-table__head {
+    display: none;
+  }
+  
+  .gcds-table--stack .gcds-table__body,
+  .gcds-table--stack .gcds-table__row,
+  .gcds-table--stack .gcds-table__cell {
+    display: block;
+    width: 100%;
+  }
+  
+  .gcds-table--stack .gcds-table__row {
+    margin-bottom: 1rem;
+    border: 1px solid var(--gcds-border-default);
+    border-radius: 4px;
+  }
+  
+  .gcds-table--stack .gcds-table__cell {
+    display: flex;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--gcds-border-light);
+    text-align: right;
+  }
+  
+  /* Add column header as pseudo-element before content */
+  .gcds-table--stack .gcds-table__cell:before {
+    content: attr(data-label);
+    font-weight: var(--gcds-font-weights-semibold);
+    padding-right: 1rem;
+    text-align: left;
+    flex: 1;
+  }
+  
+  .gcds-table--stack .gcds-table__cell:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Condensed view for smaller screens */
+@media (max-width: 480px) {
+  .gcds-table__pagination {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .gcds-pagination__button--prev,
+  .gcds-pagination__button--next {
+    padding: 0.5rem;
+    min-width: 2rem;
+  }
+} 

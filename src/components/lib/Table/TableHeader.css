@@ -1,0 +1,106 @@
+/**
+ * TableHeader.css
+ * Styles for the table header including sorting and visual treatment
+ */
+
+/* Header row styles */
+.gcds-table__head {
+  background-color: #FFFFFF;
+}
+
+/* Header cell styles */
+.gcds-table__header {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: var(--gcds-font-weights-semibold);
+  border-bottom: 2px solid var(--gcds-border-default);
+}
+
+/* Header content wrapper */
+.gcds-table__header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Sortable header styles */
+.gcds-table__header--sortable {
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.gcds-table__header--sortable:hover {
+  background-color: var(--gcds-background-hover);
+}
+
+/* Sort icon */
+.gcds-table__sort-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.gcds-table__header--sortable:hover .gcds-table__sort-icon {
+  opacity: 1;
+}
+
+/* Checkbox cell in header */
+.gcds-table__checkbox-cell {
+  width: 40px;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.gcds-table__checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Striped column styles */
+.gcds-table--striped-columns .gcds-table__header:nth-child(even),
+.gcds-table--striped-columns .gcds-table__cell:nth-child(even) {
+  background-color: var(--gcds-background-hover);
+}
+
+/* Color theme styles for header */
+.gcds-table--blue .gcds-table__head {
+  background-color: var(--gcds-color-blue-100);
+}
+
+.gcds-table--blue .gcds-table__header {
+  background-color: var(--gcds-color-blue-100);
+  border-bottom-color: var(--gcds-color-blue-500);
+}
+
+.gcds-table--green .gcds-table__head {
+  background-color: var(--gcds-color-green-100);
+}
+
+.gcds-table--green .gcds-table__header {
+  background-color: var(--gcds-color-green-100);
+  border-bottom-color: var(--gcds-color-green-500);
+}
+
+.gcds-table--red .gcds-table__head {
+  background-color: var(--gcds-color-red-100);
+}
+
+.gcds-table--red .gcds-table__header {
+  background-color: var(--gcds-color-red-100);
+  border-bottom-color: var(--gcds-color-red-500);
+}
+
+.gcds-table--purple .gcds-table__head {
+  background-color: var(--gcds-color-purple-100);
+}
+
+.gcds-table--purple .gcds-table__header {
+  background-color: var(--gcds-color-purple-100);
+  border-bottom-color: var(--gcds-color-purple-500);
+} 

@@ -1,8 +1,15 @@
 /**
  * Table Component Stories
  * 
- * This file contains all stories for the Table component, including
- * different use cases, variations, and interactive examples.
+ * NOTE: This file contains the original stories for the Table component.
+ * For more organized and feature-specific examples, please see the modular stories in:
+ * - src/stories/gcds/table/TablePagination.stories.tsx
+ * - src/stories/gcds/table/TableSorting.stories.tsx
+ * - src/stories/gcds/table/TableFiltering.stories.tsx
+ * - src/stories/gcds/table/TableSelection.stories.tsx
+ * - src/stories/gcds/table/TableStyles.stories.tsx
+ * 
+ * This file is kept for backward compatibility and will be deprecated in the future.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -10,13 +17,13 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Table, TableHeader } from '../../components/lib/Table';
 
 const meta = {
-  title: 'Components/Table',
+  title: 'Components/Table (Deprecated)',
   component: Table,
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'A reusable Table component following the GCDS design system patterns. Supports pagination, sorting, selection, and various styling options including responsive behavior.'
+        component: 'DEPRECATED: Please use the more organized stories in the Table folder instead. This file contains the original Table component stories and will be removed in a future update.'
       }
     }
   },

@@ -1,4 +1,19 @@
 /**
+ * DEPRECATED - DO NOT USE
+ * 
+ * This file has been replaced by modular CSS files:
+ * - TableBase.css
+ * - TableHeader.css
+ * - TableBody.css
+ * - TablePagination.css
+ * - TableFilters.css
+ * - TableResponsive.css
+ * 
+ * It is kept here for reference purposes only.
+ * All components now import the modular CSS files instead.
+ */
+
+/**
  * Table component styles
  * 
  * These styles follow the GCDS design system to maintain consistency

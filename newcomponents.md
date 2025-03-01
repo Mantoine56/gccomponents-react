@@ -56,17 +56,18 @@ Before development of any component begins, a thorough review of existing simila
   - [x] Verify design matches focus states and hover interactions in other components
 
 - [x] **Development Phase**
-  - [x] Implement base Table component with thead, tbody, and caption
+  - [x] Implement base Table component with `<thead>`, `<tbody>`, and caption
   - [x] Add support for column headers with sorting capabilities
   - [x] Add support for row headers
   - [x] Implement responsive behavior
   - [x] Add zebra striping option for better readability
   - [x] Add pagination integration
   - [x] Implement row selection (implemented via sortable headers)
-  - [x] Add filtering capabilities (implemented via sortable functionality)
+  - [x] Add filtering capabilities (implemented via header filters)
+  - [x] Add column filtering capabilities (Click-to-filter functionality)
 
 - [x] **Accessibility Implementation**
-  - [x] Ensure proper use of semantic HTML (thead, tbody, th with scope)
+  - [x] Ensure proper use of semantic HTML (`<thead>`, `<tbody>`, `<th>` with scope)
   - [x] Add appropriate ARIA attributes for interactive elements
   - [x] Ensure keyboard navigation through all interactive elements
   - [x] Test with screen readers to verify announcements of headers and data cells
@@ -76,6 +77,12 @@ Before development of any component begins, a thorough review of existing simila
   - [x] Document all props and usage patterns
   - [x] Include examples of responsive behavior
   - [x] Document accessibility features and best practices
+
+- [ ] **Code Organization and Refactoring**
+  - [ ] Split large component file into logical subcomponents
+  - [ ] Separate CSS into modular files
+  - [ ] Organize stories into feature-specific files
+  - [ ] Improve component architecture for maintainability
 
 - [ ] **Testing**
   - [ ] Unit tests for component functionality
@@ -290,7 +297,7 @@ Before development of any component begins, a thorough review of existing simila
   - [ ] Add support for arrow/pointer positioning
   - [ ] Implement click-outside behavior for dismissal
   - [ ] Add animation for smooth appearance/disappearance
-  - [ ] Implement autoclose option
+  - [ ] Implement auto-close option
 
 - [ ] **Accessibility Implementation**
   - [ ] Add appropriate ARIA attributes (aria-expanded, aria-controls)

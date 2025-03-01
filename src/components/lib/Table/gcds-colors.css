@@ -1,0 +1,56 @@
+/**
+ * GCDS Colors
+ * 
+ * This file defines the color variables used in the GC Design System.
+ * These variables are used by our Table component for color theming.
+ */
+
+:root {
+  /* Blue Color Palette */
+  --gcds-color-blue-50: #e6f3fc; /* Light blue */
+  --gcds-color-blue-100: #cce7f8; /* Lighter blue */
+  --gcds-color-blue-200: #b3dbf5; /* Light medium blue */
+  --gcds-color-blue-300: #8ac9ef; /* Medium blue */
+  --gcds-color-blue-400: #5aafea; /* Medium dark blue */
+  --gcds-color-blue-500: #2b90e5; /* Primary blue */
+  --gcds-color-blue-600: #1976cc; /* Medium dark blue */
+  --gcds-color-blue-700: #26374a; /* Official GC blue */
+  --gcds-color-blue-800: #172334; /* Dark blue */
+  --gcds-color-blue-900: #0f1922; /* Darkest blue */
+  
+  /* Green Color Palette */
+  --gcds-color-green-50: #e8f6e8; /* Light green */
+  --gcds-color-green-100: #d1edd1; /* Lighter green */
+  --gcds-color-green-200: #a3dba3; /* Light medium green */
+  --gcds-color-green-300: #76c976; /* Medium green */
+  --gcds-color-green-400: #48b748; /* Medium dark green */
+  --gcds-color-green-500: #1b9d1b; /* Primary green */
+  --gcds-color-green-600: #157215; /* Medium dark green */
+  --gcds-color-green-700: #0f4b0f; /* Dark green */
+  --gcds-color-green-800: #0a360a; /* Darker green */
+  --gcds-color-green-900: #062306; /* Darkest green */
+  
+  /* Red Color Palette */
+  --gcds-color-red-50: #ffeaea; /* Light red */
+  --gcds-color-red-100: #ffd6d6; /* Lighter red */
+  --gcds-color-red-200: #ffadad; /* Light medium red */
+  --gcds-color-red-300: #ff8585; /* Medium red */
+  --gcds-color-red-400: #ff5c5c; /* Medium dark red */
+  --gcds-color-red-500: #f13333; /* Primary red */
+  --gcds-color-red-600: #d42d2d; /* Medium dark red */
+  --gcds-color-red-700: #b12424; /* Dark red */
+  --gcds-color-red-800: #8a1c1c; /* Darker red */
+  --gcds-color-red-900: #5c1313; /* Darkest red */
+  
+  /* Purple Color Palette */
+  --gcds-color-purple-50: #f2e8fd; /* Light purple */
+  --gcds-color-purple-100: #e6d1fb; /* Lighter purple */
+  --gcds-color-purple-200: #d0a9f7; /* Light medium purple */
+  --gcds-color-purple-300: #b97ef3; /* Medium purple */
+  --gcds-color-purple-400: #a356ef; /* Medium dark purple */
+  --gcds-color-purple-500: #8c2fea; /* Primary purple */
+  --gcds-color-purple-600: #7526c3; /* Medium dark purple */
+  --gcds-color-purple-700: #5b1e95; /* Dark purple */
+  --gcds-color-purple-800: #41156a; /* Darker purple */
+  --gcds-color-purple-900: #2c0f47; /* Darkest purple */
+} 
