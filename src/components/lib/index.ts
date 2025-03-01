@@ -9,6 +9,10 @@
 export { EnhancedButton } from './EnhancedButton';
 export type { EnhancedButtonProps } from './EnhancedButton';
 
+// Table component
+export { Table } from './Table';
+export type { TableProps, TableHeader, TableCell } from './Table';
+
 // Additional extended components will be exported here as they are created
 // Example:
 // export { EnhancedCard } from './EnhancedCard';
