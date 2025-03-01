@@ -29,6 +29,11 @@ export interface TableHeader {
    * Whether the column is sortable
    */
   sortable?: boolean;
+
+  /**
+   * Whether the column is filterable
+   */
+  filterable?: boolean;
 }
 
 /**
@@ -203,6 +208,49 @@ export interface TableProps {
    * Custom renderer for empty state
    */
   emptyStateRenderer?: React.ReactNode;
+  
+  // New props inspired by Flowbite
+  hasShadow?: boolean;
+  hasStripedColumns?: boolean;
+  color?: 'blue' | 'green' | 'red' | 'purple';
+  hasHoverEffect?: boolean;
+  isCardStyle?: boolean;
+  stackOnMobile?: boolean;
+
+  /**
+   * Whether to enable column filtering
+   * @default false
+   */
+  isFilterable?: boolean;
+
+  /**
+   * Filter placeholder text
+   * @default 'Filter...'
+   */
+  filterPlaceholder?: string;
+
+  /**
+   * Callback when filter values change
+   */
+  onFilter?: (filterValues: Record<number, string>) => void;
+
+  /**
+   * Whether the filter should be case sensitive
+   * @default false
+   */
+  filterCaseSensitive?: boolean;
+
+  /**
+   * Whether to enable header click-to-filter
+   * @default false
+   */
+  hasHeaderFilters?: boolean;
+
+  /**
+   * Array of column indices that should have header filters
+   * If not provided, all columns have header filters when hasHeaderFilters is true
+   */
+  filterableHeaders?: number[];
 }
 
 /**
@@ -242,12 +290,39 @@ export const Table: React.FC<TableProps> = ({
   isDataTable = false,
   emptyStateMessage,
   emptyStateRenderer,
+  
+  // New props with default values
+  hasShadow = false,
+  hasStripedColumns = false,
+  color,
+  hasHoverEffect = false,
+  isCardStyle = false,
+  stackOnMobile = false,
+
+  // Filter props
+  isFilterable = false,
+  filterPlaceholder = 'Filter...',
+  onFilter,
+  filterCaseSensitive = false,
+  
+  // New header filter props
+  hasHeaderFilters = false,
+  filterableHeaders,
 }) => {
   // State for internal pagination when not controlled externally
   const [internalCurrentPage, setInternalCurrentPage] = useState(externalCurrentPage || 1);
   
   // State for internal row selection when not controlled externally
   const [internalSelectedRows, setInternalSelectedRows] = useState<number[]>(externalSelectedRows || []);
+  
+  // State for filter values
+  const [filterValues, setFilterValues] = useState<Record<number, string>>({});
+  
+  // State to manage which filter dropdown is open
+  const [activeFilterColumn, setActiveFilterColumn] = useState<number | null>(null);
+  
+  // State for temporary filter values (before applying)
+  const [tempFilterValue, setTempFilterValue] = useState<string>('');
   
   // Use either controlled or uncontrolled current page
   const activePage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
@@ -285,13 +360,57 @@ export const Table: React.FC<TableProps> = ({
     }
   };
   
-  // Get visible rows based on pagination
+  // Function to handle click outside filter dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeFilterColumn !== null) {
+        const target = event.target as HTMLElement;
+        const filterDropdown = document.querySelector('.gcds-table__filter-dropdown');
+        
+        // Don't close if clicking within the dropdown
+        if (filterDropdown && !filterDropdown.contains(target) && 
+            !target.classList.contains('gcds-table__header-filter-icon')) {
+          setActiveFilterColumn(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeFilterColumn]);
+  
+  // Get visible rows based on pagination and filtering
   const getVisibleRows = () => {
-    if (!hasPagination || !rows.length) return rows;
+    let filteredRows = rows;
+    
+    // Apply filtering if enabled and there are filter values
+    const hasFilters = Object.keys(filterValues).length > 0;
+    
+    if ((isFilterable || hasHeaderFilters) && hasFilters) {
+      filteredRows = rows.filter(row => {
+        return Object.entries(filterValues).every(([colIndex, filterValue]) => {
+          if (!filterValue.trim()) return true;
+          
+          const columnIndex = parseInt(colIndex, 10);
+          const cellValue = row[columnIndex]?.text || '';
+          
+          if (filterCaseSensitive) {
+            return cellValue.includes(filterValue);
+          } else {
+            return cellValue.toLowerCase().includes(filterValue.toLowerCase());
+          }
+        });
+      });
+    }
+    
+    // Then apply pagination
+    if (!hasPagination || !filteredRows.length) return filteredRows;
     
     const startIndex = (activePage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
-    return rows.slice(startIndex, endIndex);
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredRows.length);
+    return filteredRows.slice(startIndex, endIndex);
   };
   
   // Handle sort
@@ -351,6 +470,56 @@ export const Table: React.FC<TableProps> = ({
     return headers.length + (selectable ? 1 : 0);
   };
 
+  // Handle filter icon click
+  const toggleFilterDropdown = (columnIndex: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent sort from triggering if header is also sortable
+    
+    if (activeFilterColumn === columnIndex) {
+      setActiveFilterColumn(null);
+    } else {
+      setActiveFilterColumn(columnIndex);
+      setTempFilterValue(filterValues[columnIndex] || '');
+    }
+  };
+
+  // Apply filter from dropdown
+  const applyFilter = () => {
+    if (activeFilterColumn !== null) {
+      const newFilterValues = { ...filterValues };
+      
+      if (tempFilterValue.trim()) {
+        newFilterValues[activeFilterColumn] = tempFilterValue;
+      } else {
+        delete newFilterValues[activeFilterColumn];
+      }
+      
+      setFilterValues(newFilterValues);
+      setActiveFilterColumn(null);
+      
+      // Call external handler if provided
+      if (onFilter) {
+        onFilter(newFilterValues);
+      }
+    }
+  };
+
+  // Clear filter for specific column
+  const clearColumnFilter = () => {
+    if (activeFilterColumn !== null) {
+      const newFilterValues = { ...filterValues };
+      delete newFilterValues[activeFilterColumn];
+      
+      setFilterValues(newFilterValues);
+      setTempFilterValue('');
+      setActiveFilterColumn(null);
+      
+      // Call external handler if provided
+      if (onFilter) {
+        onFilter(newFilterValues);
+      }
+    }
+  };
+
   // Create table headers
   const renderHeaders = () => {
     return (
@@ -382,24 +551,106 @@ export const Table: React.FC<TableProps> = ({
               ? `gcds-table__header--${header.sortDirection}` 
               : '';
             
+            // Determine if this column should have a filter
+            const isFilterableHeader = hasHeaderFilters && 
+              (!filterableHeaders || filterableHeaders.includes(index));
+            
+            const filterableClass = isFilterableHeader ? 'gcds-table__header--filterable' : '';
+            const hasActiveFilter = filterValues[index] !== undefined;
+            
             return (
               <th 
                 key={header.id || `header-${index}`} 
                 scope="col" 
-                className={`gcds-table__header ${sortableClass} ${sortDirectionClass}`}
+                className={`gcds-table__header ${sortableClass} ${sortDirectionClass} ${filterableClass}`}
                 onClick={header.sortable ? () => handleSort(index, header) : undefined}
                 aria-sort={header.sortDirection === 'asc' ? 'ascending' : header.sortDirection === 'desc' ? 'descending' : undefined}
               >
-                {header.html ? (
-                  <span dangerouslySetInnerHTML={{ __html: header.html }} />
-                ) : (
-                  header.text
-                )}
-                {header.sortable && (
-                  <span className="gcds-table__sort-icon" aria-hidden="true">
-                    {header.sortDirection === 'asc' ? '▲' : header.sortDirection === 'desc' ? '▼' : ''}
-                  </span>
-                )}
+                <div className="gcds-table__header-content">
+                  {header.html ? (
+                    <span dangerouslySetInnerHTML={{ __html: header.html }} />
+                  ) : (
+                    header.text
+                  )}
+                  
+                  {/* Filter icon for filterable columns */}
+                  {isFilterableHeader && (
+                    <span 
+                      className={`gcds-table__header-filter-icon ${hasActiveFilter ? 'gcds-table__header-filter-icon--active' : ''}`}
+                      onClick={(e) => toggleFilterDropdown(index, e)}
+                      aria-label={`Filter by ${header.text}`}
+                      title={`Filter by ${header.text}`}
+                    >
+                      {/* Filter icon (funnel shape) */}
+                      ⋮⋮
+                      {hasActiveFilter && (
+                        <span className="gcds-table__filter-badge-count">1</span>
+                      )}
+                    </span>
+                  )}
+                  
+                  {/* Filter dropdown */}
+                  {activeFilterColumn === index && (
+                    <div className="gcds-table__filter-dropdown">
+                      <div className="gcds-table__filter-dropdown-header">
+                        <span className="gcds-table__filter-dropdown-title">
+                          {lang === 'en' ? 'Filter by' : 'Filtrer par'} {header.text}
+                        </span>
+                        <button 
+                          className="gcds-table__filter-dropdown-close"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveFilterColumn(null);
+                          }}
+                          aria-label={lang === 'en' ? 'Close filter' : 'Fermer le filtre'}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      
+                      <div className="gcds-table__filter-input-group">
+                        <input
+                          type="text"
+                          className="gcds-table__filter-input"
+                          placeholder={filterPlaceholder}
+                          value={tempFilterValue}
+                          onChange={(e) => setTempFilterValue(e.target.value)}
+                          aria-label={`Filter by ${header.text}`}
+                          // Auto-focus the input when dropdown opens
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      
+                      <div className="gcds-table__filter-actions">
+                        <button 
+                          className="gcds-table__filter-button gcds-table__filter-button--clear"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearColumnFilter();
+                          }}
+                        >
+                          {lang === 'en' ? 'Clear' : 'Effacer'}
+                        </button>
+                        <button 
+                          className="gcds-table__filter-button gcds-table__filter-button--apply"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            applyFilter();
+                          }}
+                        >
+                          {lang === 'en' ? 'Apply' : 'Appliquer'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {header.sortable && (
+                    <span className="gcds-table__sort-icon" aria-hidden="true">
+                      {header.sortDirection === 'asc' ? '▲' : header.sortDirection === 'desc' ? '▼' : ''}
+                    </span>
+                  )}
+                </div>
               </th>
             );
           })}
@@ -433,7 +684,7 @@ export const Table: React.FC<TableProps> = ({
       const rowClassNames = [
         'gcds-table__row',
         isStriped && rowIndex % 2 !== 0 ? 'gcds-table__row--striped' : '',
-        isSelected ? 'gcds-table__row--selected' : ''
+        isSelected ? 'gcds-table__row--selected' : '',
       ].filter(Boolean).join(' ');
       
       return (
@@ -612,13 +863,21 @@ export const Table: React.FC<TableProps> = ({
   // Build table classes based on props
   const tableClasses = [
     'gcds-table',
-    hasCellBorders ? 'gcds-table--cell-borders' : '',
-    hasHorizontalBorders ? 'gcds-table--horizontal-borders' : '',
-    hasVerticalBorders ? 'gcds-table--vertical-borders' : '',
-    density !== 'default' ? `gcds-table--${density}` : '',
-    isStriped ? 'gcds-table--striped' : '',
-    isResponsive ? 'gcds-table--responsive' : '',
-    isDataTable ? 'gcds-table--data-table' : '',
+    hasHorizontalBorders && 'gcds-table--horizontal-borders',
+    hasVerticalBorders && 'gcds-table--vertical-borders',
+    hasCellBorders && 'gcds-table--cell-borders',
+    isStriped && 'gcds-table--striped',
+    isResponsive && 'gcds-table--responsive',
+    density !== 'default' && `gcds-table--${density}`,
+    isDataTable && 'gcds-table--data-table',
+    
+    // New classes based on new props
+    hasShadow && 'gcds-table--shadow',
+    hasStripedColumns && 'gcds-table--striped-columns',
+    color && `gcds-table--${color}`,
+    hasHoverEffect && 'gcds-table--hover',
+    isCardStyle && 'gcds-table--card',
+    stackOnMobile && 'gcds-table--stack',
   ].filter(Boolean).join(' ');
 
   // Table wrapper classes for responsive behavior

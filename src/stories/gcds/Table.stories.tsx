@@ -1,50 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { Table, TableHeader } from '../../components/lib/Table';
-
 /**
- * The Table component displays tabular data in a structured format, helping users compare and analyze information efficiently.
+ * Table Component Stories
  * 
- * Use Tables when you need to present data in rows and columns that have a logical relationship to each other. Tables are particularly
- * useful for displaying:
- * - Comparative data
- * - Data that needs to be sorted or filtered
- * - Information that needs to be scanned quickly
- * - Complex data that benefits from a structured format
- * 
- * ## Properties
- * - `caption`: (Optional) Text to describe the table's purpose, displayed as a caption.
- * - `captionClasses`: (Optional) Additional CSS classes for the caption.
- * - `hasHorizontalBorders`: (Optional) Whether to display horizontal borders between rows. Default is true.
- * - `hasVerticalBorders`: (Optional) Whether to display vertical borders between columns. Default is false.
- * - `hasCellBorders`: (Optional) Whether to display borders around all cells. Default is false.
- * - `isStriped`: (Optional) Whether to display alternating row background colors. Default is false.
- * - `isResponsive`: (Optional) Whether the table is responsive (horizontally scrollable on small screens). Default is true.
- * - `density`: (Optional) Controls the density of the table rows ('default', 'compact', or 'dense'). Default is 'default'.
- * - `lang`: (Optional) The language of the component. Default is 'en'.
- * - `firstCellIsHeader`: (Optional) Whether the first cell in each row is a header. Default is false.
- * - `headers`: (Required) Array of header objects with text/html content for table headers.
- * - `rows`: (Required) Array of arrays containing row data as objects with text/html content.
- * - `hasPagination`: (Optional) Whether to enable pagination. Default is false.
- * - `paginationPosition`: (Optional) Where to display pagination controls ('top', 'bottom', or 'both'). Default is 'bottom'.
- * - `itemsPerPage`: (Optional) Number of items to display per page. Default is 10.
- * - `currentPage`: (Optional) Current active page. Default is 1.
- * - `totalItems`: (Optional) Total number of items across all pages. If not provided, uses rows.length.
- * - `onPageChange`: (Optional) Callback function when page changes.
- * - `selectable`: (Optional) Whether to enable row selection. Default is false.
- * - `selectionType`: (Optional) Type of selection allowed ('single' or 'multiple'). Default is 'multiple'.
- * - `selectedRows`: (Optional) Array of indices of pre-selected rows.
- * - `onRowSelect`: (Optional) Callback function when row selection changes.
- * 
- * ## Accessibility Considerations
- * - Always include a caption to describe what information the table contains
- * - Use table headers (th) for both columns and rows as appropriate
- * - For complex tables with multiple levels of headers, use appropriate scope attributes
- * - Ensure color contrast meets WCAG requirements, particularly when using striped rows
- * - Test tables with screen readers to ensure they're properly navigable
- * - Pagination controls should be keyboard navigable and announce page changes to screen readers
- * - Selection checkboxes should be properly labeled and have appropriate ARIA attributes
+ * This file contains all stories for the Table component, including
+ * different use cases, variations, and interactive examples.
  */
+
+import React, { useState, useEffect } from 'react';
+import { Meta, StoryObj } from '@storybook/react';
+import { Table, TableHeader } from '../../components/lib/Table';
 
 const meta = {
   title: 'Components/Table',
@@ -53,18 +16,18 @@ const meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'A reusable Table component following the GCDS design system patterns. Supports pagination, sorting, and responsive behavior.'
+        component: 'A reusable Table component following the GCDS design system patterns. Supports pagination, sorting, selection, and various styling options including responsive behavior.'
       }
     }
   },
   argTypes: {
-    caption: { 
+    caption: {
       control: 'text',
       description: 'Text that serves as a title or description for the table.'
     },
     captionClasses: { 
       control: 'text',
-      description: 'CSS classes to apply to the caption element.'
+      description: 'Additional CSS classes for the caption.'
     },
     hasHorizontalBorders: { 
       control: 'boolean',
@@ -163,7 +126,59 @@ const meta = {
     onRowSelect: {
       action: 'rowsSelected',
       description: 'Callback function when row selection changes.'
-    }
+    },
+    hasShadow: {
+      control: 'boolean',
+      description: 'Whether to add a shadow effect to the table for better depth perception.',
+      defaultValue: false
+    },
+    hasStripedColumns: {
+      control: 'boolean',
+      description: 'Whether to display alternating column background colors.',
+      defaultValue: false
+    },
+    color: {
+      control: 'select',
+      options: ['blue'],
+      description: 'Color theme for the table.',
+    },
+    hasHoverEffect: {
+      control: 'boolean',
+      description: 'Whether rows change background color on hover.',
+      defaultValue: false
+    },
+    isCardStyle: {
+      control: 'boolean',
+      description: 'Whether to style the table as a card with additional padding and borders.',
+      defaultValue: false
+    },
+    stackOnMobile: {
+      control: 'boolean',
+      description: 'Whether the table transforms to a stacked layout on mobile devices.',
+      defaultValue: false
+    },
+    isFilterable: {
+      control: 'boolean',
+      description: 'Whether to enable column filtering.',
+      defaultValue: false
+    },
+    filterPlaceholder: {
+      control: 'text',
+      description: 'Placeholder text for filter inputs.',
+    },
+    onFilter: {
+      action: 'filterChanged',
+      description: 'Callback function when filter values change.',
+    },
+    filterCaseSensitive: {
+      control: 'boolean',
+      description: 'Whether filter matching should be case sensitive.',
+      defaultValue: false
+    },
+    filterableHeaders: {
+      control: 'object',
+      description: 'Array of column indices that should have filters.',
+    },
   },
 } satisfies Meta<typeof Table>;
 
@@ -171,11 +186,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * A basic implementation of the Table component with headers and rows
+ * A basic implementation of the Table component with headers and rows.
+ * This serves as the foundation for all other table variations.
  */
 export const Basic: Story = {
   args: {
-    caption: 'Monthly statistics',
+    caption: 'Monthly Website Statistics',
     captionClasses: 'gcds-table__caption',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
@@ -187,60 +203,71 @@ export const Basic: Story = {
     headers: [
       { text: 'Month' },
       { text: 'Visitors' },
-      { text: 'Page views' }
+      { text: 'Page Views' },
+      { text: 'Conversion Rate' }
     ],
     rows: [
       [
         { text: 'January' },
         { text: '12,500' },
-        { text: '48,200' }
+        { text: '48,200' },
+        { text: '3.2%' }
       ],
       [
         { text: 'February' },
         { text: '14,800' },
-        { text: '52,700' }
+        { text: '52,700' },
+        { text: '3.5%' }
       ],
       [
         { text: 'March' },
         { text: '16,300' },
-        { text: '61,400' }
+        { text: '61,400' },
+        { text: '3.8%' }
       ]
     ]
   }
 };
 
 /**
- * A table with the first cell in each row as a header
+ * A table with the first cell in each row as a header.
+ * This pattern is useful for data that has a clear row-based organization.
  */
 export const RowHeaders: Story = {
   args: {
-    caption: 'Service usage statistics',
+    caption: 'Service Usage Statistics',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
     isStriped: false,
     isResponsive: true,
     density: 'default',
     firstCellIsHeader: true,
+    hasShadow: true,
+    hasHoverEffect: true,
     lang: 'en',
     headers: [
       { text: 'Service' },
       { text: 'Users' },
-      { text: 'Completion rate' }
+      { text: 'Sessions' },
+      { text: 'Completion Rate' }
     ],
     rows: [
       [
         { text: 'Apply for passport' },
         { text: '45,300' },
+        { text: '52,420' },
         { text: '92%' }
       ],
       [
         { text: 'Apply for citizenship' },
         { text: '32,400' },
+        { text: '40,120' },
         { text: '87%' }
       ],
       [
         { text: 'Update contact information' },
         { text: '28,700' },
+        { text: '31,050' },
         { text: '95%' }
       ]
     ]
@@ -248,17 +275,19 @@ export const RowHeaders: Story = {
 };
 
 /**
- * A striped table with alternating row colors
+ * A striped table with alternating row colors for improved readability.
+ * Particularly useful for tables with many rows.
  */
 export const Striped: Story = {
   args: {
-    caption: 'Annual budget allocation',
+    caption: 'Annual Budget Allocation',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
     isStriped: true,
     isResponsive: true,
     density: 'default',
     firstCellIsHeader: false,
+    hasShadow: true,
     lang: 'en',
     headers: [
       { text: 'Department' },
@@ -296,51 +325,60 @@ export const Striped: Story = {
 };
 
 /**
- * A compact table with reduced padding
+ * A compact table with reduced padding for dense data presentation.
+ * Useful when space is limited or when displaying large datasets.
  */
 export const Compact: Story = {
   args: {
-    caption: 'Project timeline',
+    caption: 'Project Timeline',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
-    isStriped: false,
+    isStriped: true,
     isResponsive: true,
     density: 'compact',
     firstCellIsHeader: false,
+    color: 'blue',
+    hasHoverEffect: true,
     lang: 'en',
     headers: [
       { text: 'Task' },
-      { text: 'Start date' },
-      { text: 'End date' },
+      { text: 'Assignee' },
+      { text: 'Start Date' },
+      { text: 'End Date' },
       { text: 'Status' }
     ],
     rows: [
       [
         { text: 'Research' },
+        { text: 'Maria Chen' },
         { text: '2023-01-15' },
         { text: '2023-02-28' },
         { text: 'Complete' }
       ],
       [
         { text: 'Design' },
+        { text: 'John Smith' },
         { text: '2023-03-01' },
         { text: '2023-04-15' },
         { text: 'Complete' }
       ],
       [
         { text: 'Development' },
+        { text: 'Alex Johnson' },
         { text: '2023-04-16' },
         { text: '2023-06-30' },
         { text: 'In progress' }
       ],
       [
         { text: 'Testing' },
+        { text: 'Sarah Lee' },
         { text: '2023-07-01' },
         { text: '2023-07-31' },
         { text: 'Not started' }
       ],
       [
         { text: 'Deployment' },
+        { text: 'David Wilson' },
         { text: '2023-08-01' },
         { text: '2023-08-15' },
         { text: 'Not started' }
@@ -350,13 +388,22 @@ export const Compact: Story = {
 };
 
 /**
- * A dense table with minimum padding and smaller text
+ * A dense table with minimum padding and smaller text for maximum data density.
+ * Best used for technical or administrative interfaces with experienced users.
  */
 export const Dense: Story = {
   args: {
-    ...Compact.args,
-    caption: 'Detailed project metrics',
+    caption: 'Detailed Project Metrics',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    isStriped: true,
+    hasShadow: true,
+    isResponsive: true,
     density: 'dense',
+    firstCellIsHeader: false,
+    color: 'blue',
+    hasHoverEffect: true,
+    lang: 'en',
     headers: [
       { text: 'Task ID' },
       { text: 'Task Name' },
@@ -423,18 +470,21 @@ export const Dense: Story = {
 };
 
 /**
- * A table with cell borders (grid layout)
+ * A table with cell borders (grid layout) for clear cell separation.
+ * This style works well for data that needs clear visual boundaries between cells.
  */
 export const CellBorders: Story = {
   args: {
-    caption: 'Product inventory',
+    caption: 'Product Inventory',
     hasHorizontalBorders: true,
     hasVerticalBorders: true,
     hasCellBorders: true,
     isStriped: false,
     isResponsive: true,
+    hasShadow: true,
     density: 'default',
     firstCellIsHeader: false,
+    hasHoverEffect: true,
     lang: 'en',
     headers: [
       { text: 'SKU' },
@@ -477,108 +527,126 @@ export const CellBorders: Story = {
 };
 
 /**
- * A table with vertical borders between columns
+ * A table with vertical borders between columns for improved column separation.
+ * Combined with cell borders for a complete grid view of data.
  */
 export const VerticalBorders: Story = {
   args: {
-    caption: 'Quarterly reports',
+    caption: 'Quarterly Financial Reports',
     hasHorizontalBorders: true,
     hasVerticalBorders: true,
     hasCellBorders: true,
-    isStriped: false,
+    isStriped: true,
     isResponsive: true,
-    density: 'default',
+    hasShadow: true,
+    density: 'compact',
     firstCellIsHeader: false,
+    color: 'blue',
+    hasHoverEffect: true,
     lang: 'en',
-
     headers: [
       { text: 'Quarter' },
       { text: 'Revenue' },
       { text: 'Expenses' },
-      { text: 'Profit' }
+      { text: 'Profit' },
+      { text: 'Growth' }
     ],
-
     rows: [
       [
         { text: 'Q1 2023' },
         { text: '$3.2M' },
         { text: '$2.1M' },
-        { text: '$1.1M' }
+        { text: '$1.1M' },
+        { text: '+5.2%' }
       ],
       [
         { text: 'Q2 2023' },
         { text: '$3.8M' },
         { text: '$2.3M' },
-        { text: '$1.5M' }
+        { text: '$1.5M' },
+        { text: '+8.1%' }
       ],
       [
         { text: 'Q3 2023' },
         { text: '$4.1M' },
         { text: '$2.5M' },
-        { text: '$1.6M' }
+        { text: '$1.6M' },
+        { text: '+6.7%' }
       ],
       [
         { text: 'Q4 2023' },
         { text: '$4.7M' },
         { text: '$2.8M' },
-        { text: '$1.9M' }
+        { text: '$1.9M' },
+        { text: '+9.4%' }
       ]
     ],
-
     isDataTable: true
   }
 };
 
 /**
- * A table in French language
+ * A table with French language support for bilingual interfaces.
+ * Demonstrates language localization for all table elements.
  */
 export const FrenchLanguage: Story = {
   args: {
     caption: 'Statistiques mensuelles',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
-    isStriped: false,
+    isStriped: true,
     isResponsive: true,
+    hasShadow: true,
+    isCardStyle: true,
     density: 'default',
+    color: 'blue',
     firstCellIsHeader: false,
     lang: 'fr',
     headers: [
       { text: 'Mois' },
       { text: 'Visiteurs' },
-      { text: 'Pages vues' }
+      { text: 'Pages vues' },
+      { text: 'Taux de conversion' }
     ],
     rows: [
       [
         { text: 'Janvier' },
         { text: '12 500' },
-        { text: '48 200' }
+        { text: '48 200' },
+        { text: '3,2%' }
       ],
       [
         { text: 'Février' },
         { text: '14 800' },
-        { text: '52 700' }
+        { text: '52 700' },
+        { text: '3,5%' }
       ],
       [
         { text: 'Mars' },
         { text: '16 300' },
-        { text: '61 400' }
+        { text: '61 400' },
+        { text: '3,8%' }
       ]
     ]
   }
 };
 
 /**
- * A table with pagination
+ * A table with pagination for handling large datasets.
+ * Demonstrates how users can navigate through multiple pages of data.
  */
 export const WithPagination: Story = {
   args: {
-    caption: 'Employee directory',
+    caption: 'Employee Directory',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
     isStriped: true,
     isResponsive: true,
+    hasShadow: true,
     density: 'default',
     firstCellIsHeader: false,
+    hasHoverEffect: true,
+    color: 'blue',
     lang: 'en',
     hasPagination: true,
     paginationPosition: 'bottom',
@@ -702,28 +770,35 @@ export const WithPagination: Story = {
 };
 
 /**
- * A table with pagination at both top and bottom
+ * A table with pagination controls at both top and bottom.
+ * Useful for long tables where users may need to navigate from either end.
  */
 export const PaginationTopAndBottom: Story = {
   args: {
     ...WithPagination.args,
     paginationPosition: 'both',
-    caption: 'Document registry'
+    caption: 'Document Registry',
+    color: 'blue',
+    isCardStyle: true,
   }
 };
 
 /**
- * A table with selectable rows (multiple selection)
+ * A table with selectable rows for multi-item operations.
+ * Demonstrates how users can select multiple rows for batch operations.
  */
 export const SelectableRows: Story = {
   args: {
-    caption: 'Task management',
+    caption: 'Task Management',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
     isStriped: true,
     isResponsive: true,
+    hasShadow: true,
     density: 'default',
     firstCellIsHeader: false,
+    hasHoverEffect: true,
+    isCardStyle: true,
     lang: 'en',
     selectable: true,
     selectionType: 'multiple',
@@ -776,12 +851,24 @@ export const SelectableRows: Story = {
 };
 
 /**
- * A table with single row selection
+ * A table with single row selection for choosing one option.
+ * Ideal for interfaces where users need to make a single choice from options.
  */
 export const SingleRowSelection: Story = {
   args: {
-    ...SelectableRows.args,
-    caption: 'Select a plan',
+    caption: 'Select a Subscription Plan',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    isResponsive: true,
+    hasShadow: true,
+    density: 'default',
+    firstCellIsHeader: false,
+    hasHoverEffect: true,
+    color: 'blue',
+    lang: 'en',
+    selectable: true,
     selectionType: 'single',
     selectedRows: [2],
     headers: [
@@ -825,7 +912,8 @@ export const SingleRowSelection: Story = {
 };
 
 /**
- * A table with sortable columns
+ * A table with sortable columns for interactive data organization.
+ * Users can click on column headers to sort data in ascending or descending order.
  */
 export const SortableColumns: Story = {
   render: function SortableTable(args) {
@@ -876,10 +964,18 @@ export const SortableColumns: Story = {
     );
   },
   args: {
-    caption: 'Sortable product data',
+    caption: 'Sortable Product Data',
     hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
     isStriped: true,
+    hasShadow: true,
+    isResponsive: true, 
     density: 'default',
+    hasHoverEffect: true,
+    color: 'blue',
+    isCardStyle: true,
+    lang: 'en',
     headers: [
       { text: 'Product ID' },
       { text: 'Name' },
@@ -928,16 +1024,20 @@ export const SortableColumns: Story = {
 };
 
 /**
- * A table with an empty state
+ * A table with an empty state to handle the no-data scenario gracefully.
+ * Shows users a helpful message when no data is available.
  */
 export const EmptyState: Story = {
   args: {
-    caption: 'Search results',
+    caption: 'Search Results',
     hasHorizontalBorders: true,
     hasVerticalBorders: false,
     isStriped: false,
     isResponsive: true,
+    hasShadow: true,
     density: 'default',
+    isCardStyle: true,
+    color: 'blue',
     lang: 'en',
     headers: [
       { text: 'ID' },
@@ -946,12 +1046,13 @@ export const EmptyState: Story = {
       { text: 'Role' }
     ],
     rows: [],
-    emptyStateMessage: 'No results match your search criteria'
+    emptyStateMessage: 'No results match your search criteria. Try adjusting your filters or search terms.'
   }
 };
 
 /**
- * A data table with multiple features combined
+ * A comprehensive data table with multiple features combined.
+ * Demonstrates how various features can work together in a real-world application.
  */
 export const DataTable: Story = {
   render: function FullFeaturedDataTable(args) {
@@ -1020,32 +1121,43 @@ export const DataTable: Story = {
     };
     
     return (
-      <Table
-        {...args}
-        headers={sortableHeaders}
-        rows={tableRows}
-        onSort={handleSort}
-        selectable={true}
-        selectionType="multiple"
-        selectedRows={selectedRows}
-        onRowSelect={handleRowSelect}
-        hasPagination={true}
-        currentPage={currentPage}
-        itemsPerPage={5}
-        onPageChange={handlePageChange}
-        isDataTable={true}
-      />
+      <div>
+        <h3>Enhanced Data Table with Multiple Features</h3>
+        <p className="mb-4">
+          This example combines sorting, selection, pagination, and visual enhancements.
+          Try clicking on column headers, selecting rows, and navigating between pages.
+        </p>
+        <Table
+          {...args}
+          headers={sortableHeaders}
+          rows={tableRows}
+          onSort={handleSort}
+          selectable={true}
+          selectionType="multiple"
+          selectedRows={selectedRows}
+          onRowSelect={handleRowSelect}
+          hasPagination={true}
+          currentPage={currentPage}
+          itemsPerPage={5}
+          onPageChange={handlePageChange}
+          isDataTable={true}
+        />
+      </div>
     );
   },
   args: {
-    caption: 'Complete data table example',
-    hasHorizontalBorders: false,
+    caption: 'Employee Management System',
+    hasHorizontalBorders: true,
     hasVerticalBorders: false,
     hasCellBorders: true,
     isStriped: true,
     isResponsive: true,
+    hasShadow: true,
     density: 'compact',
     firstCellIsHeader: false,
+    hasHoverEffect: true,
+    color: 'blue',
+    isCardStyle: true,
     lang: 'en',
     itemsPerPage: 5,
     headers: [
@@ -1166,12 +1278,15 @@ export const DataTable: Story = {
         { text: 'Victoria' },
         { text: '2022-04-01' }
       ]
-    ]
+    ],
+    paginationPosition: "bottom",
+    selectionType: "multiple" 
   }
 };
 
 /**
- * A table with pagination rendering example
+ * A demonstration of pagination functionality with both integrated and standalone controls.
+ * Shows how pagination can be customized in different contexts.
  */
 export const RenderPagination: Story = {
   render: function PaginationExample(args) {
@@ -1188,6 +1303,7 @@ export const RenderPagination: Story = {
     return (
       <div>
         <h3>Table with Custom Pagination Controls</h3>
+        <p className="mb-4">This example shows pagination within a table context.</p>
         <Table
           {...args}
           hasPagination={true}
@@ -1196,6 +1312,7 @@ export const RenderPagination: Story = {
         />
         
         <h3 style={{ marginTop: '2rem' }}>Standalone Pagination Example</h3>
+        <p className="mb-4">This demonstrates how pagination controls can be used independently of a table.</p>
         <div className="gcds-table__pagination">
           <div className="gcds-pagination">
             <ul className="gcds-pagination__list">
@@ -1254,10 +1371,14 @@ export const RenderPagination: Story = {
     );
   },
   args: {
-    caption: 'Employee directory with custom pagination',
+    caption: 'Employee Directory with Custom Pagination',
     hasHorizontalBorders: true,
     isStriped: true,
+    hasShadow: true,
+    isCardStyle: true,
     density: 'default',
+    color: 'blue',
+    hasHoverEffect: true,
     headers: [
       { text: 'Employee ID' },
       { text: 'Name' },
@@ -1301,44 +1422,1066 @@ export const RenderPagination: Story = {
 };
 
 /**
- * A table that clearly demonstrates only the cell borders feature
+ * A clear demonstration of cell borders with rounded corners.
+ * Shows how cell borders can be used to create a grid-like appearance with improved aesthetics.
  */
 export const CellBordersOnly: Story = {
   args: {
-    caption: 'Cell Borders Demonstration',
+    caption: 'Cell Borders with Rounded Corners',
     hasHorizontalBorders: false,
     hasVerticalBorders: false,
     hasCellBorders: true,
     isStriped: false,
     isResponsive: true,
+    hasShadow: true,
     density: 'default',
     firstCellIsHeader: false,
+    hasHoverEffect: true,
     lang: 'en',
     headers: [
-      { text: 'Column 1' },
-      { text: 'Column 2' },
-      { text: 'Column 3' },
-      { text: 'Column 4' }
+      { text: 'Feature' },
+      { text: 'Description' },
+      { text: 'Status' },
+      { text: 'Priority' }
     ],
     rows: [
       [
-        { text: 'Row 1, Cell 1' },
-        { text: 'Row 1, Cell 2' },
-        { text: 'Row 1, Cell 3' },
-        { text: 'Row 1, Cell 4' }
+        { text: 'Cell Borders' },
+        { text: 'Creates clear visual separation between data points' },
+        { text: 'Implemented' },
+        { text: 'High' }
       ],
       [
-        { text: 'Row 2, Cell 1' },
-        { text: 'Row 2, Cell 2' },
-        { text: 'Row 2, Cell 3' },
-        { text: 'Row 2, Cell 4' }
+        { text: 'Rounded Corners' },
+        { text: 'Softens the appearance for improved aesthetics' },
+        { text: 'Implemented' },
+        { text: 'Medium' }
       ],
       [
-        { text: 'Row 3, Cell 1' },
-        { text: 'Row 3, Cell 2' },
-        { text: 'Row 3, Cell 3' },
-        { text: 'Row 3, Cell 4' }
+        { text: 'Box Shadow' },
+        { text: 'Adds depth and raises table from background' },
+        { text: 'Implemented' },
+        { text: 'Low' }
       ]
     ]
   }
+};
+
+/**
+ * Table with a shadow effect for better depth and hierarchy.
+ * The shadow helps the table stand out from the background, creating visual hierarchy.
+ */
+export const TableWithShadow: Story = {
+  args: {
+    caption: 'Table with Shadow Effect',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    isStriped: true,
+    density: 'default',
+    hasShadow: true,
+    hasHoverEffect: true,
+    headers: [
+      { text: 'Feature' },
+      { text: 'Description' },
+      { text: 'Benefit' }
+    ],
+    rows: [
+      [
+        { text: 'Shadow Effect' },
+        { text: 'Adds subtle drop shadow to table' },
+        { text: 'Creates visual hierarchy' }
+      ],
+      [
+        { text: 'Rounded Corners' },
+        { text: 'Softens table edges' },
+        { text: 'Modern aesthetic appeal' }
+      ],
+      [
+        { text: 'Border Radius' },
+        { text: 'Consistent with GCDS design system' },
+        { text: 'Visual consistency' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table with alternating column backgrounds to improve readability across wide tables.
+ * This feature is particularly useful for tables with many columns.
+ */
+export const StripedColumns: Story = {
+  args: {
+    caption: 'Table with Striped Columns',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    isStriped: false,
+    hasStripedColumns: true,
+    hasShadow: true,
+    density: 'default',
+    hasHoverEffect: true,
+    headers: [
+      { text: 'Q1' },
+      { text: 'Q2' },
+      { text: 'Q3' },
+      { text: 'Q4' },
+      { text: 'Annual' },
+      { text: 'Target' },
+      { text: 'Variance' }
+    ],
+    rows: [
+      [
+        { text: '$3.2M' },
+        { text: '$3.8M' },
+        { text: '$4.1M' },
+        { text: '$4.7M' },
+        { text: '$15.8M' },
+        { text: '$15.0M' },
+        { text: '+5.3%' }
+      ],
+      [
+        { text: '$2.1M' },
+        { text: '$2.3M' },
+        { text: '$2.5M' },
+        { text: '$2.8M' },
+        { text: '$9.7M' },
+        { text: '$10.0M' },
+        { text: '-3.0%' }
+      ],
+      [
+        { text: '$1.1M' },
+        { text: '$1.5M' },
+        { text: '$1.6M' },
+        { text: '$1.9M' },
+        { text: '$6.1M' },
+        { text: '$5.0M' },
+        { text: '+22.0%' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table with hover effect to highlight rows as the user moves their cursor.
+ * Improves usability by providing visual feedback on mouse interaction.
+ */
+export const HoverEffect: Story = {
+  args: {
+    caption: 'Table with Row Hover Effect',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    hasShadow: true,
+    density: 'default',
+    hasHoverEffect: true,
+    headers: [
+      { text: 'Action Item' },
+      { text: 'Owner' },
+      { text: 'Status' },
+      { text: 'Due Date' }
+    ],
+    rows: [
+      [
+        { text: 'Complete project proposal' },
+        { text: 'John Smith' },
+        { text: 'In Progress' },
+        { text: '2023-08-15' }
+      ],
+      [
+        { text: 'Schedule kickoff meeting' },
+        { text: 'Maria Garcia' },
+        { text: 'Completed' },
+        { text: '2023-08-10' }
+      ],
+      [
+        { text: 'Finalize budget estimates' },
+        { text: 'Robert Johnson' },
+        { text: 'Not Started' },
+        { text: '2023-08-20' }
+      ],
+      [
+        { text: 'Present to stakeholders' },
+        { text: 'Sarah Lee' },
+        { text: 'Scheduled' },
+        { text: '2023-08-25' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table with blue color theme for visual categorization.
+ * Color themes can help users recognize tables by their purpose or category.
+ */
+export const BlueColorVariant: Story = {
+  args: {
+    caption: 'Sales Performance (Blue Theme)',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    hasShadow: true,
+    density: 'default',
+    color: 'blue',
+    hasHoverEffect: true,
+    headers: [
+      { text: 'Sales Rep' },
+      { text: 'Region' },
+      { text: 'Q1 Sales' },
+      { text: 'Q2 Sales' },
+      { text: 'YTD Total' }
+    ],
+    rows: [
+      [
+        { text: 'John Smith' },
+        { text: 'East' },
+        { text: '$245,000' },
+        { text: '$312,000' },
+        { text: '$557,000' }
+      ],
+      [
+        { text: 'Maria Garcia' },
+        { text: 'West' },
+        { text: '$321,000' },
+        { text: '$378,000' },
+        { text: '$699,000' }
+      ],
+      [
+        { text: 'Robert Chen' },
+        { text: 'Central' },
+        { text: '$197,000' },
+        { text: '$235,000' },
+        { text: '$432,000' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table with card-like styling for a more contained presentation.
+ * Card styling adds padding and defined borders for a more distinct UI element.
+ */
+export const CardStyle: Story = {
+  args: {
+    caption: 'Project Schedule in Card Style',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: false,
+    isStriped: true,
+    isResponsive: true,
+    hasShadow: true,
+    density: 'default',
+    firstCellIsHeader: false,
+    hasHoverEffect: true,
+    isCardStyle: true,
+    color: 'blue',
+    lang: 'en',
+    headers: [
+      { text: 'Phase' },
+      { text: 'Start Date' },
+      { text: 'End Date' },
+      { text: 'Status' },
+      { text: 'Owner' }
+    ],
+    rows: [
+      [
+        { text: 'Discovery' },
+        { text: '2023-09-01' },
+        { text: '2023-09-15' },
+        { text: 'Completed' },
+        { text: 'Maria Chen' }
+      ],
+      [
+        { text: 'Design' },
+        { text: '2023-09-16' },
+        { text: '2023-10-15' },
+        { text: 'In Progress' },
+        { text: 'David Lee' }
+      ],
+      [
+        { text: 'Development' },
+        { text: '2023-10-16' },
+        { text: '2023-12-15' },
+        { text: 'Not Started' },
+        { text: 'John Smith' }
+      ],
+      [
+        { text: 'Testing' },
+        { text: '2023-12-16' },
+        { text: '2023-12-31' },
+        { text: 'Not Started' },
+        { text: 'Sarah Wilson' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table that stacks vertically on mobile devices for better responsive behavior.
+ * Each row transforms into a vertical card on small screens, improving readability.
+ */
+export const StackOnMobile: Story = {
+  args: {
+    caption: 'Responsive Table that Stacks on Mobile',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    hasShadow: true,
+    density: 'default',
+    hasHoverEffect: true,
+    isCardStyle: true,
+    stackOnMobile: true,
+    headers: [
+      { text: 'Product' },
+      { text: 'Category' },
+      { text: 'Price' },
+      { text: 'Stock' },
+      { text: 'Rating' }
+    ],
+    rows: [
+      [
+        { text: 'Smartphone X20' },
+        { text: 'Electronics' },
+        { text: '$899.99' },
+        { text: '42' },
+        { text: '4.7/5' }
+      ],
+      [
+        { text: 'Bluetooth Headphones' },
+        { text: 'Audio' },
+        { text: '$149.99' },
+        { text: '78' },
+        { text: '4.5/5' }
+      ],
+      [
+        { text: 'Wireless Keyboard' },
+        { text: 'Accessories' },
+        { text: '$59.99' },
+        { text: '25' },
+        { text: '4.2/5' }
+      ],
+      [
+        { text: 'Smart Watch' },
+        { text: 'Wearables' },
+        { text: '$199.99' },
+        { text: '15' },
+        { text: '4.8/5' }
+      ]
+    ]
+  }
+};
+
+/**
+ * Table combining multiple style options to showcase customization possibilities.
+ * Demonstrates how various styling options can be combined for maximum impact.
+ */
+export const TableWithCombinedStyles: Story = {
+  args: {
+    caption: 'Advanced Table with Combined Styling',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    hasStripedColumns: false,
+    hasShadow: true,
+    density: 'compact',
+    firstCellIsHeader: false,
+    hasHoverEffect: true,
+    color: 'blue',
+    isCardStyle: true,
+    lang: 'en',
+    selectable: true,
+    selectionType: 'multiple',
+    headers: [
+      { text: 'Project' },
+      { text: 'Client' },
+      { text: 'Status' },
+      { text: 'Budget' },
+      { text: 'Timeline' },
+      { text: 'Team Size' }
+    ],
+    rows: [
+      [
+        { text: 'Website Redesign' },
+        { text: 'Acme Corp' },
+        { text: 'In Progress' },
+        { text: '$75,000' },
+        { text: 'Q3 2023' },
+        { text: '5' }
+      ],
+      [
+        { text: 'Mobile App Development' },
+        { text: 'XYZ Industries' },
+        { text: 'Planning' },
+        { text: '$120,000' },
+        { text: 'Q4 2023' },
+        { text: '8' }
+      ],
+      [
+        { text: 'E-commerce Platform' },
+        { text: 'Global Retail' },
+        { text: 'Completed' },
+        { text: '$200,000' },
+        { text: 'Q2 2023' },
+        { text: '12' }
+      ],
+      [
+        { text: 'CRM Implementation' },
+        { text: 'Local Services' },
+        { text: 'On Hold' },
+        { text: '$85,000' },
+        { text: 'TBD' },
+        { text: '6' }
+      ]
+    ]
+  }
+};
+
+/**
+ * A table with filtering capabilities for interactive data exploration.
+ * Users can filter data in each column to quickly find what they need.
+ */
+export const FilterableTable: Story = {
+  name: 'Table with Column Filtering',
+  args: {
+    caption: 'Employee Directory with Filtering',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: false,
+    isStriped: true,
+    isResponsive: true,
+    isFilterable: true,
+    headers: [
+      { text: 'ID' },
+      { text: 'Name' },
+      { text: 'Department' },
+      { text: 'Role' },
+      { text: 'Status' },
+      { text: 'Location' },
+      { text: 'Start Date' }
+    ],
+    rows: [
+      [
+        { text: 'EMP-001' },
+        { text: 'John Smith' },
+        { text: 'IT' },
+        { text: 'Senior Developer' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2021-03-15' }
+      ],
+      [
+        { text: 'EMP-002' },
+        { text: 'Maria Garcia' },
+        { text: 'HR' },
+        { text: 'Manager' },
+        { text: 'Active' },
+        { text: 'Montreal' },
+        { text: '2020-06-22' }
+      ],
+      [
+        { text: 'EMP-003' },
+        { text: 'Robert Johnson' },
+        { text: 'Finance' },
+        { text: 'Analyst' },
+        { text: 'Active' },
+        { text: 'Vancouver' },
+        { text: '2022-01-10' }
+      ],
+      [
+        { text: 'EMP-004' },
+        { text: 'Sarah Lee' },
+        { text: 'Marketing' },
+        { text: 'Specialist' },
+        { text: 'On Leave' },
+        { text: 'Ottawa' },
+        { text: '2019-09-05' }
+      ],
+      [
+        { text: 'EMP-005' },
+        { text: 'Michael Brown' },
+        { text: 'Operations' },
+        { text: 'Coordinator' },
+        { text: 'Active' },
+        { text: 'Calgary' },
+        { text: '2022-05-17' }
+      ],
+      [
+        { text: 'EMP-006' },
+        { text: 'Emma Wilson' },
+        { text: 'IT' },
+        { text: 'Designer' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2021-11-30' }
+      ],
+      [
+        { text: 'EMP-007' },
+        { text: 'David Miller' },
+        { text: 'Sales' },
+        { text: 'Representative' },
+        { text: 'Active' },
+        { text: 'Halifax' },
+        { text: '2020-08-12' }
+      ],
+      [
+        { text: 'EMP-008' },
+        { text: 'Jennifer Davis' },
+        { text: 'Customer Service' },
+        { text: 'Lead' },
+        { text: 'Inactive' },
+        { text: 'Winnipeg' },
+        { text: '2018-03-22' }
+      ],
+      [
+        { text: 'EMP-009' },
+        { text: 'James Rodriguez' },
+        { text: 'Legal' },
+        { text: 'Counsel' },
+        { text: 'Active' },
+        { text: 'Ottawa' },
+        { text: '2022-02-14' }
+      ],
+      [
+        { text: 'EMP-010' },
+        { text: 'Sophia Martinez' },
+        { text: 'Research' },
+        { text: 'Scientist' },
+        { text: 'Active' },
+        { text: 'Edmonton' },
+        { text: '2021-07-08' }
+      ],
+      [
+        { text: 'EMP-011' },
+        { text: 'Thomas Anderson' },
+        { text: 'IT' },
+        { text: 'Sysadmin' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2019-11-15' }
+      ],
+      [
+        { text: 'EMP-012' },
+        { text: 'Olivia Taylor' },
+        { text: 'HR' },
+        { text: 'Recruiter' },
+        { text: 'Active' },
+        { text: 'Victoria' },
+        { text: '2022-04-01' }
+      ]
+    ],
+    filterPlaceholder: 'Filter...'
+  }
+};
+
+/**
+ * A table with specific filterable columns and pagination combined.
+ * Demonstrates how to limit filtering to specific columns and how filtering works with pagination.
+ */
+export const FilterableWithPagination: Story = {
+  render: function FilterablePaginatedTableStory(args) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [filteredRows, setFilteredRows] = useState(args.rows);
+    
+    // Handle page change
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+    };
+    
+    // Handle filter changes
+    const handleFilter = (filterValues: Record<number, string>) => {
+      // Filter the rows based on the filter values
+      if (Object.keys(filterValues).length > 0) {
+        const filtered = args.rows.filter(row => {
+          return Object.entries(filterValues).every(([colIndex, filterValue]) => {
+            if (!filterValue.trim()) return true;
+            
+            const columnIndex = parseInt(colIndex, 10);
+            const cellValue = row[columnIndex]?.text || '';
+            
+            return cellValue.toLowerCase().includes(filterValue.toLowerCase());
+          });
+        });
+        
+        setFilteredRows(filtered);
+        setCurrentPage(1); // Reset to first page when filter changes
+      } else {
+        setFilteredRows(args.rows);
+      }
+    };
+    
+    return (
+      <div>
+        <p className="mb-4">
+          This example combines filtering with pagination. Only Department, Role, and Status columns are filterable.
+          Showing {filteredRows.length} total items, page {currentPage} of {Math.ceil(filteredRows.length / 5)}.
+        </p>
+        <Table
+          {...args}
+          isFilterable={true}
+          filterableHeaders={[2, 3, 4]} // Only Department, Role, Status columns
+          onFilter={handleFilter}
+          hasPagination={true}
+          itemsPerPage={5}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          totalItems={filteredRows.length}
+          rows={filteredRows}
+        />
+      </div>
+    );
+  },
+  args: {
+    caption: 'Employee Directory with Filtering',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: true,
+    hasShadow: true,
+    isResponsive: true,
+    hasHoverEffect: true,
+    isCardStyle: true,
+    color: 'blue',
+    density: 'default',
+    headers: [
+      { text: 'ID' },
+      { text: 'Name' },
+      { text: 'Department', filterable: true },
+      { text: 'Role', filterable: true },
+      { text: 'Status', filterable: true },
+      { text: 'Location' },
+      { text: 'Start Date' }
+    ],
+    rows: [
+      [
+        { text: 'EMP-001' },
+        { text: 'John Smith' },
+        { text: 'IT' },
+        { text: 'Senior Developer' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2021-03-15' }
+      ],
+      [
+        { text: 'EMP-002' },
+        { text: 'Maria Garcia' },
+        { text: 'HR' },
+        { text: 'Manager' },
+        { text: 'Active' },
+        { text: 'Montreal' },
+        { text: '2020-06-22' }
+      ],
+      [
+        { text: 'EMP-003' },
+        { text: 'Robert Johnson' },
+        { text: 'Finance' },
+        { text: 'Analyst' },
+        { text: 'Active' },
+        { text: 'Vancouver' },
+        { text: '2022-01-10' }
+      ],
+      [
+        { text: 'EMP-004' },
+        { text: 'Sarah Lee' },
+        { text: 'Marketing' },
+        { text: 'Specialist' },
+        { text: 'On Leave' },
+        { text: 'Ottawa' },
+        { text: '2019-09-05' }
+      ],
+      [
+        { text: 'EMP-005' },
+        { text: 'Michael Brown' },
+        { text: 'Operations' },
+        { text: 'Coordinator' },
+        { text: 'Active' },
+        { text: 'Calgary' },
+        { text: '2022-05-17' }
+      ],
+      [
+        { text: 'EMP-006' },
+        { text: 'Emma Wilson' },
+        { text: 'IT' },
+        { text: 'Designer' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2021-11-30' }
+      ],
+      [
+        { text: 'EMP-007' },
+        { text: 'David Miller' },
+        { text: 'Sales' },
+        { text: 'Representative' },
+        { text: 'Active' },
+        { text: 'Halifax' },
+        { text: '2020-08-12' }
+      ],
+      [
+        { text: 'EMP-008' },
+        { text: 'Jennifer Davis' },
+        { text: 'Customer Service' },
+        { text: 'Lead' },
+        { text: 'Inactive' },
+        { text: 'Winnipeg' },
+        { text: '2018-03-22' }
+      ],
+      [
+        { text: 'EMP-009' },
+        { text: 'James Rodriguez' },
+        { text: 'Legal' },
+        { text: 'Counsel' },
+        { text: 'Active' },
+        { text: 'Ottawa' },
+        { text: '2022-02-14' }
+      ],
+      [
+        { text: 'EMP-010' },
+        { text: 'Sophia Martinez' },
+        { text: 'Research' },
+        { text: 'Scientist' },
+        { text: 'Active' },
+        { text: 'Edmonton' },
+        { text: '2021-07-08' }
+      ],
+      [
+        { text: 'EMP-011' },
+        { text: 'Thomas Anderson' },
+        { text: 'IT' },
+        { text: 'Sysadmin' },
+        { text: 'Active' },
+        { text: 'Toronto' },
+        { text: '2019-11-15' }
+      ],
+      [
+        { text: 'EMP-012' },
+        { text: 'Olivia Taylor' },
+        { text: 'HR' },
+        { text: 'Recruiter' },
+        { text: 'Active' },
+        { text: 'Victoria' },
+        { text: '2022-04-01' }
+      ]
+    ],
+    filterPlaceholder: 'Filter...'
+  }
 }; 
+
+/**
+ * Table with Header Filters
+ *
+ * This story demonstrates tables with clickable filter icons in the headers.
+ * Users can click on the filter icon to open a dropdown with filtering options.
+ */
+export const HeaderFilters: Story = {
+  name: 'Table with Header Filters',
+  args: {
+    caption: 'Employee Directory with Header Filters',
+    hasHorizontalBorders: true,
+    hasVerticalBorders: false,
+    hasCellBorders: false,
+    isStriped: true,
+    hasHoverEffect: true,
+    isResponsive: true,
+    hasShadow: true,
+    color: 'blue',
+    hasHeaderFilters: true, // Enable the header filters
+    headers: [
+      { text: 'Name', filterable: true, sortable: true },
+      { text: 'Department', filterable: true },
+      { text: 'Position', filterable: true },
+      { text: 'Email', filterable: true },
+      { text: 'Status', filterable: true }
+    ],
+    rows: [
+      [
+        { text: 'John Smith' },
+        { text: 'Engineering' },
+        { text: 'Senior Developer' },
+        { text: 'john.smith@example.com' },
+        { text: 'Active' }
+      ],
+      [
+        { text: 'Emily Johnson' },
+        { text: 'Marketing' },
+        { text: 'Marketing Manager' },
+        { text: 'emily.johnson@example.com' },
+        { text: 'Active' }
+      ],
+      [
+        { text: 'Michael Brown' },
+        { text: 'Finance' },
+        { text: 'Financial Analyst' },
+        { text: 'michael.brown@example.com' },
+        { text: 'Away' }
+      ],
+      [
+        { text: 'Jessica Williams' },
+        { text: 'HR' },
+        { text: 'HR Director' },
+        { text: 'jessica.williams@example.com' },
+        { text: 'Active' }
+      ],
+      [
+        { text: 'David Miller' },
+        { text: 'Engineering' },
+        { text: 'Frontend Developer' },
+        { text: 'david.miller@example.com' },
+        { text: 'On leave' }
+      ],
+      [
+        { text: 'Sarah Davis' },
+        { text: 'Sales' },
+        { text: 'Sales Representative' },
+        { text: 'sarah.davis@example.com' },
+        { text: 'Active' }
+      ],
+      [
+        { text: 'Thomas Wilson' },
+        { text: 'Engineering' },
+        { text: 'Backend Developer' },
+        { text: 'thomas.wilson@example.com' },
+        { text: 'Active' }
+      ],
+      [
+        { text: 'Jennifer Garcia' },
+        { text: 'Product' },
+        { text: 'Product Manager' },
+        { text: 'jennifer.garcia@example.com' },
+        { text: 'Active' }
+      ]
+    ],
+  },
+  
+  render: function HeaderFiltersTable(args) {
+    const [filteredCount, setFilteredCount] = React.useState(args.rows.length);
+    
+    // Handle filter changes
+    const handleFilter = (filterValues: Record<number, string>) => {
+      // Count how many rows would remain after filtering
+      let filtered = args.rows;
+      
+      if (Object.keys(filterValues).length > 0) {
+        filtered = args.rows.filter(row => {
+          return Object.entries(filterValues).every(([colIndex, filterValue]) => {
+            if (!filterValue.trim()) return true;
+            
+            const columnIndex = parseInt(colIndex, 10);
+            const cellValue = row[columnIndex]?.text || '';
+            
+            return cellValue.toLowerCase().includes(filterValue.toLowerCase());
+          });
+        });
+      }
+      
+      setFilteredCount(filtered.length);
+    };
+    
+    return (
+      <div>
+        <p>Click on the filter icon (⋮⋮) in any column header to filter the data. {filteredCount < args.rows.length && `Showing ${filteredCount} of ${args.rows.length} rows.`}</p>
+        <Table {...args} onFilter={handleFilter} />
+      </div>
+    );
+  },
+  
+  parameters: {
+    docs: {
+      description: {
+        story: `
+This table demonstrates the header filter functionality, allowing users to filter data directly from column headers.
+Each column header has a filter icon that, when clicked, opens a dropdown where users can enter filter criteria.
+This approach provides a clean user interface similar to what users expect in data management applications like Excel.
+
+The filter controls appear on demand rather than taking up permanent space above the table, which provides a cleaner look when filters aren't needed.
+        `
+      }
+    }
+  }
+};
+
+/**
+ * Table with Header Filters and Pagination
+ * 
+ * This story demonstrates header filtering combined with pagination.
+ */
+export const HeaderFiltersWithPagination: Story = {
+  name: 'Table with Header Filters and Pagination',
+  args: {
+    caption: 'Project Status with Header Filters and Pagination',
+    hasHorizontalBorders: true,
+    isStriped: true,
+    hasHoverEffect: true,
+    hasShadow: true,
+    color: 'blue',
+    hasPagination: true,
+    itemsPerPage: 5,
+    hasHeaderFilters: true, // Enable header filters
+    filterableHeaders: [0, 1, 2, 4], // Only make some columns filterable
+    headers: [
+      { text: 'Project Name', filterable: true, sortable: true },
+      { text: 'Department', filterable: true },
+      { text: 'Status', filterable: true },
+      { text: 'Budget', filterable: false },
+      { text: 'Priority', filterable: true }
+    ],
+    rows: [
+      [
+        { text: 'Website Redesign' },
+        { text: 'Marketing' },
+        { text: 'In Progress' },
+        { text: '$125,000' },
+        { text: 'High' }
+      ],
+      [
+        { text: 'Mobile App Development' },
+        { text: 'Engineering' },
+        { text: 'Planning' },
+        { text: '$250,000' },
+        { text: 'High' }
+      ],
+      [
+        { text: 'Data Migration' },
+        { text: 'IT' },
+        { text: 'Completed' },
+        { text: '$75,000' },
+        { text: 'Medium' }
+      ],
+      [
+        { text: 'CRM Implementation' },
+        { text: 'Sales' },
+        { text: 'In Progress' },
+        { text: '$180,000' },
+        { text: 'High' }
+      ],
+      [
+        { text: 'Employee Training Program' },
+        { text: 'HR' },
+        { text: 'Planning' },
+        { text: '$50,000' },
+        { text: 'Medium' }
+      ],
+      [
+        { text: 'Product Launch Campaign' },
+        { text: 'Marketing' },
+        { text: 'In Progress' },
+        { text: '$300,000' },
+        { text: 'Critical' }
+      ],
+      [
+        { text: 'Office Relocation' },
+        { text: 'Operations' },
+        { text: 'On Hold' },
+        { text: '$450,000' },
+        { text: 'Low' }
+      ],
+      [
+        { text: 'Customer Feedback System' },
+        { text: 'Customer Support' },
+        { text: 'Planning' },
+        { text: '$90,000' },
+        { text: 'Medium' }
+      ],
+      [
+        { text: 'Security Audit' },
+        { text: 'IT' },
+        { text: 'In Progress' },
+        { text: '$120,000' },
+        { text: 'Critical' }
+      ],
+      [
+        { text: 'Inventory Management System' },
+        { text: 'Operations' },
+        { text: 'Planning' },
+        { text: '$200,000' },
+        { text: 'High' }
+      ],
+      [
+        { text: 'Social Media Strategy' },
+        { text: 'Marketing' },
+        { text: 'Completed' },
+        { text: '$65,000' },
+        { text: 'Medium' }
+      ],
+      [
+        { text: 'Annual Report' },
+        { text: 'Finance' },
+        { text: 'In Progress' },
+        { text: '$40,000' },
+        { text: 'High' }
+      ]
+    ],
+  },
+  
+  render: function HeaderFiltersWithPaginationTable(args) {
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [filterValues, setFilterValues] = React.useState<Record<number, string>>({});
+    const [filteredRows, setFilteredRows] = React.useState(args.rows);
+    
+    // Handle page changes
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+    };
+    
+    // Handle filter changes
+    const handleFilter = (newFilterValues: Record<number, string>) => {
+      setFilterValues(newFilterValues);
+      
+      // Filter the rows based on the new filter values
+      if (Object.keys(newFilterValues).length > 0) {
+        const filtered = args.rows.filter(row => {
+          return Object.entries(newFilterValues).every(([colIndex, filterValue]) => {
+            if (!filterValue.trim()) return true;
+            
+            const columnIndex = parseInt(colIndex, 10);
+            const cellValue = row[columnIndex]?.text || '';
+            
+            return cellValue.toLowerCase().includes(filterValue.toLowerCase());
+          });
+        });
+        
+        setFilteredRows(filtered);
+      } else {
+        setFilteredRows(args.rows);
+      }
+      
+      // Reset to first page when filters change
+      setCurrentPage(1);
+    };
+    
+    return (
+      <div>
+        <p>
+          This example combines header filtering with pagination. 
+          {Object.keys(filterValues).length > 0 && 
+            ` Showing ${filteredRows.length} of ${args.rows.length} rows after filtering.`
+          }
+        </p>
+        <Table 
+          {...args} 
+          onFilter={handleFilter} 
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          rows={filteredRows}
+          totalItems={filteredRows.length}
+        />
+      </div>
+    );
+  },
+  
+  parameters: {
+    docs: {
+      description: {
+        story: `
+This table demonstrates how header filtering works together with pagination. The table allows users to:
+
+1. Filter data by clicking filter icons in select column headers (Project Name, Department, Status, and Priority)
+2. Navigate through pages of filtered results
+3. Combines the power of filtering and pagination for large datasets
+
+Note that the filtered results affect the pagination, automatically recalculating the total number of pages based on the filtered set of data.
+        `
+      }
+    }
+  }
+};
