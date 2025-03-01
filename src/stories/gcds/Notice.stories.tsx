@@ -24,7 +24,7 @@ import React from 'react';
  *   (this component specifically appears to have issues with the args approach)
  */
 const meta: Meta<typeof GcdsNotice> = {
-  title: 'GCDS Components/Base/Notice',
+  title: 'GCDS Components/Base/Feedback/Notice',
   component: GcdsNotice,
   parameters: {
     docs: {

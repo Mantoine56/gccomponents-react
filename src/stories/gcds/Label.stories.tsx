@@ -7,7 +7,7 @@ import { GcdsLabel } from '@cdssnc/gcds-components-react';
  * The Label component provides clear and accessible labels for form fields.
  */
 const meta: Meta<typeof GcdsLabel> = {
-  title: 'GCDS Components/Base/Label',
+  title: 'GCDS Components/Base/Form/Label',
   component: GcdsLabel,
   parameters: {
     docs: {

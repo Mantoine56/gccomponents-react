@@ -3,13 +3,13 @@
 This document tracks the progress of improving the GCDS component documentation in Storybook.
 
 ## Missing Components (Need New Story Files)
-- [ ] GcdsNavGroup
-- [ ] GcdsSignature
-- [ ] GcdsTopicMenu
-- [ ] GcdsVerifyBanner
-- [ ] GcdsSrOnly (Note: We have ScreenreaderOnly.stories.tsx which might be related)
-- [ ] FormLayout (Note: Component not found in GCDS library, may need to be created)
-- [ ] LayoutSection (Note: Component not found in GCDS library, may need to be created)
+- [x] GcdsNavGroup
+- [x] GcdsSignature
+- [x] GcdsTopicMenu
+- [x] GcdsVerifyBanner
+- [x] GcdsSrOnly (Note: We have ScreenreaderOnly.stories.tsx which might be related)
+- [x] FormLayout (Note: Component not found in GCDS library, created as a pattern)
+- [x] LayoutSection (Note: Component not found in GCDS library, created as a pattern)
 
 ## Stories That Need Improvement
 
@@ -66,6 +66,13 @@ This document tracks the progress of improving the GCDS component documentation 
 - [x] ErrorMessage.stories.tsx
 - [x] HintText.stories.tsx
 - [x] NotificationPanel.stories.tsx (Notice.stories.tsx)
+- [x] NavGroup.stories.tsx
+- [x] Signature.stories.tsx
+- [x] TopicMenu.stories.tsx
+- [x] VerifyBanner.stories.tsx
+- [x] ScreenreaderOnly.stories.tsx
+- [x] FormLayout.stories.tsx
+- [x] LayoutSection.stories.tsx
 
 ## In Progress
 - None 

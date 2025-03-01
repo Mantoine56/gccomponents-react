@@ -7,7 +7,7 @@ import { GcdsHeader } from '@cdssnc/gcds-components-react';
  * This component uses the GCDS Header component to provide a consistent branding experience.
  */
 const meta: Meta<typeof GcdsHeader> = {
-  title: 'GCDS Components/Base/Header',
+  title: 'GCDS Components/Base/Navigation/Header',
   component: GcdsHeader,
   parameters: {
     docs: {

@@ -5,7 +5,7 @@ import { GcdsDateModified } from '@cdssnc/gcds-components-react';
  * GcdsDateModified component from the GC Design System
  */
 const meta: Meta<typeof GcdsDateModified> = {
-  title: 'GCDS Components/Base/DateModified',
+  title: 'GCDS Components/Base/Typography/DateModified',
   component: GcdsDateModified,
   parameters: {
     docs: {

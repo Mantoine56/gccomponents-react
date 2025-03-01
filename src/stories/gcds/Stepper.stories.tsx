@@ -7,7 +7,7 @@ import { GcdsStepper } from '@cdssnc/gcds-components-react';
  * The Stepper component displays progress through a sequence of steps or stages in a process.
  */
 const meta: Meta<typeof GcdsStepper> = {
-  title: 'GCDS Components/Base/Stepper',
+  title: 'GCDS Components/Base/Navigation/Stepper',
   component: GcdsStepper,
   parameters: {
     docs: {

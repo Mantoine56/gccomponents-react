@@ -5,7 +5,7 @@ import { GcdsSearch } from '@cdssnc/gcds-components-react';
  * GcdsSearch component from the GC Design System
  */
 const meta: Meta<typeof GcdsSearch> = {
-  title: 'GCDS Components/Base/Search',
+  title: 'GCDS Components/Base/Form/Search',
   component: GcdsSearch,
   parameters: {
     docs: {

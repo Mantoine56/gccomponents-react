@@ -7,7 +7,7 @@ import { GcdsPhaseBanner } from '@cdssnc/gcds-components-react';
  * The Phase Banner component is used to inform users about the status of a service or feature.
  */
 const meta: Meta<typeof GcdsPhaseBanner> = {
-  title: 'GCDS Components/Base/PhaseBanner',
+  title: 'GCDS Components/Base/Feedback/PhaseBanner',
   component: GcdsPhaseBanner,
   parameters: {
     docs: {

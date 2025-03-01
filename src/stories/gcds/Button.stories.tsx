@@ -7,7 +7,7 @@ import { GcdsButton } from '@cdssnc/gcds-components-react';
  * This component uses the official GC Design System Button component.
  */
 const meta: Meta<typeof GcdsButton> = {
-  title: 'GCDS Components/Base/Button',
+  title: 'GCDS Components/Base/Action/Button',
   component: GcdsButton,
   parameters: {
     docs: {
