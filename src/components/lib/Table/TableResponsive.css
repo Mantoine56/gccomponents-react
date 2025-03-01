@@ -3,12 +3,39 @@
  * Styles for responsive behavior of tables on small screens
  */
 
-/* Responsive wrapper */
+/* Responsive wrapper - enhanced for better horizontal scrolling */
 @media (max-width: 768px) {
+  .gcds-table-wrapper {
+    position: relative;
+    max-width: 100%;
+  }
+  
   .gcds-table--responsive {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    box-shadow: inset -8px 0 6px -6px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Smaller font and padding for dense view on mobile */
+  .gcds-table--responsive .gcds-table__cell,
+  .gcds-table--responsive .gcds-table__header {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Visual indicator for scrollable tables */
+  .gcds-table--responsive::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 15px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(200, 200, 200, 0.15));
   }
 }
 

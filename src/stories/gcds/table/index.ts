@@ -11,4 +11,5 @@ export * from './TableSorting.stories';
 export * from './TableFiltering.stories';
 export * from './TableSelection.stories';
 export * from './TableStyles.stories';
-export * from './TableColorFix.stories'; 
+export * from './TableColorFix.stories';
+export * from './TableResponsive.stories'; 

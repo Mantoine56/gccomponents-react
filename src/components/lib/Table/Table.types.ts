@@ -242,6 +242,8 @@ export interface TableProps {
   
   /**
    * Whether to stack table on mobile devices
+   * This transforms the table into a card-like layout on small screens.
+   * When false (default), the table remains in its original format but becomes horizontally scrollable.
    * @default false
    */
   stackOnMobile?: boolean;
