@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# GC Design System Extended Component Library
+
+This Storybook showcases components from the [GC Design System](https://design-system.alpha.canada.ca/en/) and our extended components built on top of it.
+
+## About This Library
+
+This component library provides:
+
+- **Base GCDS Components**: All the standard components from the Government of Canada Design System
+- **Extended Components**: Additional components and enhanced versions of the base components
+- **Usage Examples**: Interactive examples showing how to use each component
+
+## How to Use This Storybook
+
+- Browse components using the sidebar on the left
+- View component examples and their code 
+- Adjust props using the Controls panel to see how components change
+- Copy code snippets for use in your project
+
+## Getting Started
+
+Install the required packages:
+
+```bash
+npm install @cdssnc/gcds-components @cdssnc/gcds-components-react
+```
+
+Import the CSS in your application (usually in your main entry file):
+
+```jsx
+import '@cdssnc/gcds-components/dist/gcds/gcds.css';
+```
+
+Import and use components:
+
+```jsx
+import { GcdsButton, GcdsContainer } from '@cdssnc/gcds-components-react';
+
+function App() {
+  return (
+    <GcdsContainer>
+      <GcdsButton>Click me</GcdsButton>
+    </GcdsContainer>
+  );
+}
+```
+
+## Contribution
+
+We welcome contributions to expand this library! Please follow our guidelines for adding new components or enhancing existing ones. 

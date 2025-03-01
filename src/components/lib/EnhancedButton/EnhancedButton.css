@@ -1,0 +1,60 @@
+/**
+ * EnhancedButton component styling
+ */
+
+.enhanced-button {
+  position: relative;
+  display: inline-block;
+}
+
+/* Pulse animation for drawing attention */
+.enhanced-button--pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(0, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Loading state styling */
+.enhanced-button--loading {
+  cursor: wait;
+}
+
+.enhanced-button__loading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.enhanced-button__spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.enhanced-button__text {
+  display: inline-block;
+} 
