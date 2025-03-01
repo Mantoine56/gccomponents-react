@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Table, TableHeader } from '../../components/lib/Table';
 
@@ -428,8 +428,8 @@ export const Dense: Story = {
 export const CellBorders: Story = {
   args: {
     caption: 'Product inventory',
-    hasHorizontalBorders: false,
-    hasVerticalBorders: false,
+    hasHorizontalBorders: true,
+    hasVerticalBorders: true,
     hasCellBorders: true,
     isStriped: false,
     isResponsive: true,
@@ -484,17 +484,20 @@ export const VerticalBorders: Story = {
     caption: 'Quarterly reports',
     hasHorizontalBorders: true,
     hasVerticalBorders: true,
+    hasCellBorders: true,
     isStriped: false,
     isResponsive: true,
     density: 'default',
     firstCellIsHeader: false,
     lang: 'en',
+
     headers: [
       { text: 'Quarter' },
       { text: 'Revenue' },
       { text: 'Expenses' },
       { text: 'Profit' }
     ],
+
     rows: [
       [
         { text: 'Q1 2023' },
@@ -520,7 +523,9 @@ export const VerticalBorders: Story = {
         { text: '$2.8M' },
         { text: '$1.9M' }
       ]
-    ]
+    ],
+
+    isDataTable: true
   }
 };
 
@@ -826,25 +831,46 @@ export const SortableColumns: Story = {
   render: function SortableTable(args) {
     const [sortIndex, setSortIndex] = useState<number | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [tableRows, setTableRows] = useState([...args.rows]);
     
     // Create headers with sortable property
     const sortableHeaders: TableHeader[] = args.headers.map((header, index) => ({
       ...header,
       sortable: true,
-      sortDirection: sortIndex === index ? sortDirection : 'none'
+      sortDirection: sortIndex === index ? sortDirection : undefined
     }));
     
     // Handle sorting
     const handleSort = (columnIndex: number, direction: 'asc' | 'desc') => {
       setSortIndex(columnIndex);
       setSortDirection(direction);
-      console.log(`Sorting column ${columnIndex} in ${direction} order`);
+      
+      // Actually sort the rows based on the column and direction
+      const sortedRows = [...args.rows].sort((a, b) => {
+        const valueA = a[columnIndex].text;
+        const valueB = b[columnIndex].text;
+        
+        // Handle numeric values
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+          return direction === 'asc' 
+            ? Number(valueA) - Number(valueB) 
+            : Number(valueB) - Number(valueA);
+        }
+        
+        // Handle string values
+        return direction === 'asc' 
+          ? String(valueA).localeCompare(String(valueB)) 
+          : String(valueB).localeCompare(String(valueA));
+      });
+      
+      setTableRows(sortedRows);
     };
     
     return (
       <Table
         {...args}
         headers={sortableHeaders}
+        rows={tableRows}
         onSort={handleSort}
       />
     );
@@ -929,38 +955,75 @@ export const EmptyState: Story = {
  */
 export const DataTable: Story = {
   render: function FullFeaturedDataTable(args) {
-    const [sortIndex, setSortIndex] = useState<number | null>(1); // Sort by 'Name' by default
+    const [sortIndex, setSortIndex] = useState<number | null>(1); // Default sort by Name
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [selectedRows, setSelectedRows] = useState<number[]>([0, 2]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [tableRows, setTableRows] = useState([...args.rows]);
+    
+    // Initial sort on mount
+    useEffect(() => {
+      handleSort(1, 'asc');
+    }, []);
     
     // Create headers with sortable property
     const sortableHeaders: TableHeader[] = args.headers.map((header, index) => ({
       ...header,
       sortable: true,
-      sortDirection: sortIndex === index ? sortDirection : 'none'
+      sortDirection: sortIndex === index ? sortDirection : undefined
     }));
     
     // Handle sorting
     const handleSort = (columnIndex: number, direction: 'asc' | 'desc') => {
       setSortIndex(columnIndex);
       setSortDirection(direction);
+      
+      // Actually sort the rows based on the column and direction
+      const sortedRows = [...args.rows].sort((a, b) => {
+        const valueA = a[columnIndex].text;
+        const valueB = b[columnIndex].text;
+        
+        // Handle numeric values
+        if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+          return direction === 'asc' 
+            ? Number(valueA) - Number(valueB) 
+            : Number(valueB) - Number(valueA);
+        }
+        
+        // Handle date values (detect format YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (dateRegex.test(valueA) && dateRegex.test(valueB)) {
+          return direction === 'asc'
+            ? new Date(valueA).getTime() - new Date(valueB).getTime()
+            : new Date(valueB).getTime() - new Date(valueA).getTime();
+        }
+        
+        // Handle string values
+        return direction === 'asc' 
+          ? String(valueA).localeCompare(String(valueB)) 
+          : String(valueB).localeCompare(String(valueA));
+      });
+      
+      setTableRows(sortedRows);
     };
     
     // Handle row selection
     const handleRowSelect = (selectedIndices: number[]) => {
       setSelectedRows(selectedIndices);
+      console.log('Selected rows:', selectedIndices);
     };
     
     // Handle page change
     const handlePageChange = (page: number) => {
       setCurrentPage(page);
+      console.log('Page changed to:', page);
     };
     
     return (
       <Table
         {...args}
         headers={sortableHeaders}
+        rows={tableRows}
         onSort={handleSort}
         selectable={true}
         selectionType="multiple"
@@ -968,6 +1031,7 @@ export const DataTable: Story = {
         onRowSelect={handleRowSelect}
         hasPagination={true}
         currentPage={currentPage}
+        itemsPerPage={5}
         onPageChange={handlePageChange}
         isDataTable={true}
       />
@@ -975,9 +1039,9 @@ export const DataTable: Story = {
   },
   args: {
     caption: 'Complete data table example',
-    hasHorizontalBorders: true,
+    hasHorizontalBorders: false,
     hasVerticalBorders: false,
-    hasCellBorders: false,
+    hasCellBorders: true,
     isStriped: true,
     isResponsive: true,
     density: 'compact',
@@ -1107,123 +1171,174 @@ export const DataTable: Story = {
 };
 
 /**
- * A function to render pagination controls for the Table component
+ * A table with pagination rendering example
  */
-export const renderPagination = (
-  totalPages: number,
-  activePage: number,
-  handlePageChange: (page: number) => void,
-  lang: 'en' | 'fr' = 'en'
-) => {
-  // Don't render pagination if there's only one page
-  if (totalPages <= 1) return null;
-
-  // Maximum number of page buttons to show
-  const maxPageButtons = 5;
-  
-  // Calculate which page buttons to show
-  const pageButtons = [];
-  
-  if (totalPages <= maxPageButtons) {
-    // Show all pages if there are fewer than maxPageButtons
-    for (let i = 1; i <= totalPages; i++) {
-      pageButtons.push(i);
-    }
-  } else {
-    // Always show first and last pages
-    // Show pages around the current page for context
-    pageButtons.push(1);
+export const RenderPagination: Story = {
+  render: function PaginationExample(args) {
+    const [currentPage, setCurrentPage] = useState(1);
     
-    // Calculate start and end of the middle section
-    let startPage = Math.max(2, activePage - 1);
-    let endPage = Math.min(totalPages - 1, activePage + 1);
+    // Handle page change
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+      console.log('Page changed to:', page);
+    };
     
-    // Adjust if we're near the beginning
-    if (activePage <= 3) {
-      endPage = Math.min(totalPages - 1, maxPageButtons - 1);
-    }
+    const totalPages = 7; // Example total pages
     
-    // Adjust if we're near the end
-    if (activePage >= totalPages - 2) {
-      startPage = Math.max(2, totalPages - (maxPageButtons - 2));
-    }
-    
-    // Add ellipsis if there's a gap after the first page
-    if (startPage > 2) {
-      pageButtons.push('ellipsis-start');
-    }
-    
-    // Add the middle pages
-    for (let i = startPage; i <= endPage; i++) {
-      pageButtons.push(i);
-    }
-    
-    // Add ellipsis if there's a gap before the last page
-    if (endPage < totalPages - 1) {
-      pageButtons.push('ellipsis-end');
-    }
-    
-    // Add the last page
-    pageButtons.push(totalPages);
-  }
-  
-  // Text for previous/next buttons
-  const prevText = lang === 'en' ? 'Previous' : 'Précédent';
-  const nextText = lang === 'en' ? 'Next' : 'Suivant';
-  
-  return (
-    <div className="gcds-table__pagination">
-      <div className="gcds-pagination">
-        <ul className="gcds-pagination__list">
-          {/* Previous button */}
-          <li className="gcds-pagination__item">
-            <button
-              className="gcds-pagination__button gcds-pagination__button--prev"
-              onClick={() => handlePageChange(Math.max(1, activePage - 1))}
-              disabled={activePage === 1}
-              aria-label={lang === 'en' ? 'Go to previous page' : 'Aller à la page précédente'}
-            >
-              {prevText}
-            </button>
-          </li>
-          
-          {/* Page number buttons */}
-          {pageButtons.map((page, index) => {
-            if (page === 'ellipsis-start' || page === 'ellipsis-end') {
-              return (
-                <li key={`ellipsis-${index}`} className="gcds-pagination__item">
-                  <span className="gcds-pagination__ellipsis">...</span>
-                </li>
-              );
-            }
-            
-            return (
-              <li key={`page-${page}`} className="gcds-pagination__item">
+    return (
+      <div>
+        <h3>Table with Custom Pagination Controls</h3>
+        <Table
+          {...args}
+          hasPagination={true}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+        
+        <h3 style={{ marginTop: '2rem' }}>Standalone Pagination Example</h3>
+        <div className="gcds-table__pagination">
+          <div className="gcds-pagination">
+            <ul className="gcds-pagination__list">
+              {/* Previous button */}
+              <li className="gcds-pagination__item">
                 <button
-                  className={`gcds-pagination__button ${activePage === page ? 'gcds-pagination__button--current' : ''}`}
-                  onClick={() => handlePageChange(page as number)}
-                  aria-label={lang === 'en' ? `Go to page ${page}` : `Aller à la page ${page}`}
-                  aria-current={activePage === page ? 'page' : undefined}
+                  className="gcds-pagination__button gcds-pagination__button--prev"
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  aria-label="Go to previous page"
                 >
-                  {page}
+                  Previous
                 </button>
               </li>
-            );
-          })}
-          
-          {/* Next button */}
-          <li className="gcds-pagination__item">
-            <button
-              className="gcds-pagination__button gcds-pagination__button--next"
-              onClick={() => handlePageChange(Math.min(totalPages, activePage + 1))}
-              disabled={activePage === totalPages}
-              aria-label={lang === 'en' ? 'Go to next page' : 'Aller à la page suivante'}
-            >
-              {nextText}
-            </button>
-          </li>
-        </ul>
+              
+              {/* Page number buttons */}
+              {[1, 2, 3, '...', 7].map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <li key={`ellipsis-${index}`} className="gcds-pagination__item">
+                      <span className="gcds-pagination__ellipsis">...</span>
+                    </li>
+                  );
+                }
+                
+                const pageNum = page as number;
+                return (
+                  <li key={`page-${page}`} className="gcds-pagination__item">
+                    <button
+                      className={`gcds-pagination__button ${currentPage === pageNum ? 'gcds-pagination__button--current' : ''}`}
+                      onClick={() => handlePageChange(pageNum)}
+                      aria-label={`Go to page ${pageNum}`}
+                      aria-current={currentPage === pageNum ? 'page' : undefined}
+                    >
+                      {pageNum}
+                    </button>
+                  </li>
+                );
+              })}
+              
+              {/* Next button */}
+              <li className="gcds-pagination__item">
+                <button
+                  className="gcds-pagination__button gcds-pagination__button--next"
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  aria-label="Go to next page"
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  },
+  args: {
+    caption: 'Employee directory with custom pagination',
+    hasHorizontalBorders: true,
+    isStriped: true,
+    density: 'default',
+    headers: [
+      { text: 'Employee ID' },
+      { text: 'Name' },
+      { text: 'Department' },
+      { text: 'Position' }
+    ],
+    rows: [
+      [
+        { text: '1001' },
+        { text: 'John Smith' },
+        { text: 'IT' },
+        { text: 'Developer' }
+      ],
+      [
+        { text: '1002' },
+        { text: 'Maria Garcia' },
+        { text: 'HR' },
+        { text: 'Manager' }
+      ],
+      [
+        { text: '1003' },
+        { text: 'Robert Johnson' },
+        { text: 'Finance' },
+        { text: 'Analyst' }
+      ],
+      [
+        { text: '1004' },
+        { text: 'Sarah Lee' },
+        { text: 'Marketing' },
+        { text: 'Specialist' }
+      ],
+      [
+        { text: '1005' },
+        { text: 'Michael Brown' },
+        { text: 'Operations' },
+        { text: 'Coordinator' }
+      ]
+    ],
+    itemsPerPage: 2
+  }
+};
+
+/**
+ * A table that clearly demonstrates only the cell borders feature
+ */
+export const CellBordersOnly: Story = {
+  args: {
+    caption: 'Cell Borders Demonstration',
+    hasHorizontalBorders: false,
+    hasVerticalBorders: false,
+    hasCellBorders: true,
+    isStriped: false,
+    isResponsive: true,
+    density: 'default',
+    firstCellIsHeader: false,
+    lang: 'en',
+    headers: [
+      { text: 'Column 1' },
+      { text: 'Column 2' },
+      { text: 'Column 3' },
+      { text: 'Column 4' }
+    ],
+    rows: [
+      [
+        { text: 'Row 1, Cell 1' },
+        { text: 'Row 1, Cell 2' },
+        { text: 'Row 1, Cell 3' },
+        { text: 'Row 1, Cell 4' }
+      ],
+      [
+        { text: 'Row 2, Cell 1' },
+        { text: 'Row 2, Cell 2' },
+        { text: 'Row 2, Cell 3' },
+        { text: 'Row 2, Cell 4' }
+      ],
+      [
+        { text: 'Row 3, Cell 1' },
+        { text: 'Row 3, Cell 2' },
+        { text: 'Row 3, Cell 3' },
+        { text: 'Row 3, Cell 4' }
+      ]
+    ]
+  }
 }; 

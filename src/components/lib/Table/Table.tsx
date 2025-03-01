@@ -273,24 +273,25 @@ export const Table: React.FC<TableProps> = ({
     }
   }, [externalSelectedRows]);
   
+  // Function to handle page changes
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    
+    setInternalCurrentPage(pageNumber);
+    
+    // Call the external handler if provided
+    if (onPageChange) {
+      onPageChange(pageNumber);
+    }
+  };
+  
   // Get visible rows based on pagination
   const getVisibleRows = () => {
-    if (!hasPagination) return rows;
+    if (!hasPagination || !rows.length) return rows;
     
     const startIndex = (activePage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
     return rows.slice(startIndex, endIndex);
-  };
-  
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    // Update internal state
-    setInternalCurrentPage(page);
-    
-    // Call external handler if provided
-    if (onPageChange) {
-      onPageChange(page);
-    }
   };
   
   // Handle sort
@@ -301,31 +302,26 @@ export const Table: React.FC<TableProps> = ({
     onSort(columnIndex, newDirection);
   };
   
-  // Handle row selection
+  // This handles row selection checkboxes
   const handleRowSelect = (rowIndex: number) => {
     if (!selectable) return;
     
-    let newSelectedRows: number[];
+    let newSelectedRows = [...internalSelectedRows];
     
     if (selectionType === 'single') {
-      // Single selection replaces any existing selection
-      newSelectedRows = [rowIndex];
+      // Single selection mode: only one row can be selected
+      newSelectedRows = newSelectedRows.includes(rowIndex) ? [] : [rowIndex];
     } else {
-      // Multiple selection toggles the selected state
-      if (activeSelectedRows.includes(rowIndex)) {
-        newSelectedRows = activeSelectedRows.filter(index => index !== rowIndex);
+      // Multiple selection mode: toggle selection
+      if (newSelectedRows.includes(rowIndex)) {
+        newSelectedRows = newSelectedRows.filter(idx => idx !== rowIndex);
       } else {
-        newSelectedRows = [...activeSelectedRows, rowIndex];
+        newSelectedRows.push(rowIndex);
       }
     }
     
-    // Update internal state
     setInternalSelectedRows(newSelectedRows);
-    
-    // Call external handler if provided
-    if (onRowSelect) {
-      onRowSelect(newSelectedRows);
-    }
+    onRowSelect?.(newSelectedRows);
   };
   
   // Handle select all rows
@@ -348,6 +344,11 @@ export const Table: React.FC<TableProps> = ({
     if (onRowSelect) {
       onRowSelect(newSelectedRows);
     }
+  };
+
+  // Function to calculate the total number of columns including selection column
+  const getEffectiveColumnCount = (): number => {
+    return headers.length + (selectable ? 1 : 0);
   };
 
   // Create table headers
@@ -407,113 +408,99 @@ export const Table: React.FC<TableProps> = ({
     );
   };
 
-  // Create table rows
+  // Render table rows with proper classes for selection state
   const renderRows = () => {
-    const visibleRows = getVisibleRows();
-    
-    if (visibleRows.length === 0) {
+    if (!rows || rows.length === 0) {
       return (
-        <tbody className="gcds-table__body">
-          <tr className="gcds-table__row">
-            <td 
-              className="gcds-table__cell gcds-table__empty-state" 
-              colSpan={headers.length + (selectable ? 1 : 0)}
-            >
-              {emptyStateRenderer || (
-                <div>
-                  <div className="gcds-table__empty-icon">📋</div>
-                  <div className="gcds-table__empty-message">
-                    {emptyStateMessage || (lang === 'en' ? 'No data available' : 'Aucune donnée disponible')}
-                  </div>
-                </div>
-              )}
-            </td>
-          </tr>
-        </tbody>
+        <tr>
+          <td colSpan={getEffectiveColumnCount()} className="gcds-table__empty-state">
+            {emptyStateRenderer 
+              ? emptyStateRenderer 
+              : <span>{emptyStateMessage || 'No data available'}</span>
+            }
+          </td>
+        </tr>
       );
     }
-    
-    return (
-      <tbody className="gcds-table__body">
-        {visibleRows.map((row, rowIndex) => {
-          // Calculate the actual row index in the full dataset
-          const dataRowIndex = hasPagination ? (activePage - 1) * itemsPerPage + rowIndex : rowIndex;
-          const isSelected = activeSelectedRows.includes(dataRowIndex);
-          const rowClassNames = [
-            'gcds-table__row',
-            isStriped && rowIndex % 2 !== 0 ? 'gcds-table__row--striped' : '',
-            isSelected ? 'gcds-table__row--selected' : ''
-          ].filter(Boolean).join(' ');
-          
-          return (
-            <tr 
-              key={`row-${rowIndex}`} 
-              className={rowClassNames}
-              onClick={selectable ? () => handleRowSelect(dataRowIndex) : undefined}
-              aria-selected={isSelected ? 'true' : undefined}
-            >
-              {/* Selection checkbox */}
-              {selectable && (
-                <td className="gcds-table__cell gcds-table__checkbox-cell">
-                  <input
-                    type="checkbox"
-                    className="gcds-table__checkbox"
-                    checked={isSelected}
-                    onChange={() => handleRowSelect(dataRowIndex)}
-                    aria-label={lang === 'en' ? `Select row ${dataRowIndex + 1}` : `Sélectionner la ligne ${dataRowIndex + 1}`}
-                    onClick={(e) => e.stopPropagation()} // Prevent row click from triggering
-                  />
-                </td>
-              )}
-              
-              {row.map((cell, cellIndex) => {
-                // If firstCellIsHeader is true and this is the first cell in the row, render as th
-                if (firstCellIsHeader && cellIndex === 0) {
-                  return (
-                    <th 
-                      key={cell.id || `cell-${rowIndex}-${cellIndex}`} 
-                      scope="row" 
-                      className="gcds-table__header"
-                    >
-                      {cell.html ? (
-                        <span dangerouslySetInnerHTML={{ __html: cell.html }} />
-                      ) : (
-                        cell.text
-                      )}
-                    </th>
-                  );
-                }
-                
-                // Otherwise render as td
-                return (
-                  <td 
-                    key={cell.id || `cell-${rowIndex}-${cellIndex}`} 
-                    className="gcds-table__cell"
-                  >
-                    {cell.html ? (
-                      <span dangerouslySetInnerHTML={{ __html: cell.html }} />
-                    ) : (
-                      cell.text
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        })}
-      </tbody>
-    );
+
+    const visibleRows = getVisibleRows();
+
+    return visibleRows.map((row, rowIndex) => {
+      const absoluteRowIndex = hasPagination 
+        ? (activePage - 1) * itemsPerPage + rowIndex 
+        : rowIndex;
+      const isSelected = activeSelectedRows.includes(absoluteRowIndex);
+      const rowClassNames = [
+        'gcds-table__row',
+        isStriped && rowIndex % 2 !== 0 ? 'gcds-table__row--striped' : '',
+        isSelected ? 'gcds-table__row--selected' : ''
+      ].filter(Boolean).join(' ');
+      
+      return (
+        <tr 
+          key={`row-${rowIndex}`} 
+          className={rowClassNames}
+          onClick={selectable ? () => handleRowSelect(absoluteRowIndex) : undefined}
+          aria-selected={isSelected ? 'true' : undefined}
+        >
+          {selectable && (
+            <td className="gcds-table__cell gcds-table__cell--selection">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => handleRowSelect(absoluteRowIndex)}
+                aria-label={`Select row ${absoluteRowIndex + 1}`}
+                onClick={(e) => e.stopPropagation()} // Prevent row click from triggering twice
+              />
+            </td>
+          )}
+          {row.map((cell, cellIndex) => {
+            // If firstCellIsHeader is true and this is the first cell in the row, render as th
+            if (firstCellIsHeader && cellIndex === 0) {
+              return (
+                <th 
+                  key={`cell-${rowIndex}-${cellIndex}`} 
+                  scope="row" 
+                  className="gcds-table__header"
+                >
+                  {cell.html ? (
+                    <span dangerouslySetInnerHTML={{ __html: cell.html }} />
+                  ) : (
+                    cell.text
+                  )}
+                </th>
+              );
+            }
+            
+            // Otherwise render as td
+            return (
+              <td 
+                key={`cell-${rowIndex}-${cellIndex}`} 
+                className="gcds-table__cell"
+              >
+                {cell.html ? (
+                  <span dangerouslySetInnerHTML={{ __html: cell.html }} />
+                ) : (
+                  cell.text
+                )}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    });
   };
 
   // Render pagination controls
   const renderPagination = () => {
+    // Don't render pagination if there's only one page
     if (!hasPagination || totalPages <= 1) return null;
     
     // Maximum number of page buttons to show
     const maxPageButtons = 5;
     
     // Calculate which page buttons to show
-    const pageButtons = [];
+    const pageButtons: (number | string)[] = [];
     
     if (totalPages <= maxPageButtons) {
       // Show all pages if there are fewer than maxPageButtons
@@ -526,8 +513,18 @@ export const Table: React.FC<TableProps> = ({
       pageButtons.push(1);
       
       // Calculate start and end of the middle section
-      const startPage = Math.max(2, activePage - 1);
-      const endPage = Math.min(totalPages - 1, activePage + 1);
+      let startPage = Math.max(2, activePage - 1);
+      let endPage = Math.min(totalPages - 1, activePage + 1);
+      
+      // Adjust if we're near the beginning
+      if (activePage <= 3) {
+        endPage = Math.min(totalPages - 1, maxPageButtons - 1);
+      }
+      
+      // Adjust if we're near the end
+      if (activePage >= totalPages - 2) {
+        startPage = Math.max(2, totalPages - (maxPageButtons - 2));
+      }
       
       // Add ellipsis if there's a gap after the first page
       if (startPage > 2) {
@@ -545,7 +542,9 @@ export const Table: React.FC<TableProps> = ({
       }
       
       // Add the last page
-      pageButtons.push(totalPages);
+      if (totalPages > 1) {
+        pageButtons.push(totalPages);
+      }
     }
     
     // Text for previous/next buttons
@@ -578,15 +577,16 @@ export const Table: React.FC<TableProps> = ({
                 );
               }
               
+              const pageNum = page as number;
               return (
-                <li key={`page-${page}`} className="gcds-pagination__item">
+                <li key={`page-${pageNum}`} className="gcds-pagination__item">
                   <button
-                    className={`gcds-pagination__button ${activePage === page ? 'gcds-pagination__button--current' : ''}`}
-                    onClick={() => handlePageChange(page as number)}
-                    aria-label={lang === 'en' ? `Go to page ${page}` : `Aller à la page ${page}`}
-                    aria-current={activePage === page ? 'page' : undefined}
+                    className={`gcds-pagination__button ${activePage === pageNum ? 'gcds-pagination__button--current' : ''}`}
+                    onClick={() => handlePageChange(pageNum)}
+                    aria-label={lang === 'en' ? `Go to page ${pageNum}` : `Aller à la page ${pageNum}`}
+                    aria-current={activePage === pageNum ? 'page' : undefined}
                   >
-                    {page}
+                    {pageNum}
                   </button>
                 </li>
               );
@@ -609,16 +609,16 @@ export const Table: React.FC<TableProps> = ({
     );
   };
 
-  // Additional classes based on props
+  // Build table classes based on props
   const tableClasses = [
     'gcds-table',
+    hasCellBorders ? 'gcds-table--cell-borders' : '',
     hasHorizontalBorders ? 'gcds-table--horizontal-borders' : '',
     hasVerticalBorders ? 'gcds-table--vertical-borders' : '',
-    hasCellBorders ? 'gcds-table--cell-borders' : '',
+    density !== 'default' ? `gcds-table--${density}` : '',
+    isStriped ? 'gcds-table--striped' : '',
     isResponsive ? 'gcds-table--responsive' : '',
-    density === 'compact' ? 'gcds-table--compact' : '',
-    density === 'dense' ? 'gcds-table--dense' : '',
-    isDataTable ? 'gcds-table--data-table' : ''
+    isDataTable ? 'gcds-table--data-table' : '',
   ].filter(Boolean).join(' ');
 
   // Table wrapper classes for responsive behavior
@@ -636,7 +636,9 @@ export const Table: React.FC<TableProps> = ({
           </caption>
         )}
         {headers.length > 0 && renderHeaders()}
-        {renderRows()}
+        <tbody className="gcds-table__body">
+          {renderRows()}
+        </tbody>
       </table>
       
       {/* Bottom pagination if enabled */}

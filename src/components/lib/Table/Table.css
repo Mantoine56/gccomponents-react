@@ -82,8 +82,88 @@
   border: 1px solid var(--gcds-border-light);
 }
 
+/* Make cell borders more visible for better visual clarity */
+.gcds-table--cell-borders {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
 .gcds-table--cell-borders .gcds-table__header {
   border-bottom: 2px solid var(--gcds-border-default);
+}
+
+/* Style the table with rounded corners on the outside only */
+.gcds-table--cell-borders {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--gcds-border-default);
+  border-radius: var(--gcds-border-radius-md, 4px);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* More specific selectors for the corner cells to ensure proper rounding */
+/* Only the first cells in the thead should have top rounded corners */
+.gcds-table--cell-borders thead tr:first-child th:first-child {
+  border-top-left-radius: var(--gcds-border-radius-md, 4px);
+}
+
+.gcds-table--cell-borders thead tr:first-child th:last-child {
+  border-top-right-radius: var(--gcds-border-radius-md, 4px);
+}
+
+/* Only the last cells in the last tbody row should have bottom rounded corners */
+.gcds-table--cell-borders tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--gcds-border-radius-md, 4px);
+}
+
+.gcds-table--cell-borders tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--gcds-border-radius-md, 4px);
+}
+
+/* Improve header and cell border consistency */
+.gcds-table--cell-borders th,
+.gcds-table--cell-borders td {
+  border: 1px solid var(--gcds-border-default);
+}
+
+/* Ensure headers have a consistent bottom border */
+.gcds-table--cell-borders thead th {
+  border-bottom: 2px solid var(--gcds-border-default);
+}
+
+/* Improve visual appearance of selected rows */
+.gcds-table__row--selected {
+  background-color: rgba(var(--gcds-selected-light-rgb, 229, 243, 255), 0.5) !important;
+}
+
+.gcds-table__row--striped.gcds-table__row--selected {
+  background-color: rgba(var(--gcds-selected-light-rgb, 229, 243, 255), 0.5) !important;
+}
+
+/* Improve sort icon visibility */
+.gcds-table__sort-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gcds-text-secondary);
+  transition: transform 0.2s, color 0.2s;
+  font-size: 0.75rem;
+}
+
+.gcds-table__header--sortable {
+  cursor: pointer;
+  position: relative;
+  padding-right: 2.5rem;
+  user-select: none;
+}
+
+.gcds-table__header--sortable:hover {
+  background-color: var(--gcds-hover-background, #f5f5f5);
 }
 
 /* Density variations */
@@ -203,34 +283,11 @@
   cursor: pointer;
 }
 
-.gcds-table__row--selected {
-  background-color: var(--gcds-selected-light-background);
-}
-
-.gcds-table__row--striped.gcds-table__row--selected {
-  background-color: var(--gcds-selected-light-background);
-}
-
 /* Sorting styles */
 .gcds-table__header--sortable {
   cursor: pointer;
   position: relative;
   padding-right: 2rem;
-}
-
-.gcds-table__sort-icon {
-  position: absolute;
-  right: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--gcds-text-secondary);
-  transition: transform 0.2s, color 0.2s;
-}
-
-.gcds-table__header--sortable:hover .gcds-table__sort-icon {
-  color: var(--gcds-text-primary);
 }
 
 /* Filter styles */
