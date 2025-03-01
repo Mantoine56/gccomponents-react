@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect } from '@storybook/test';
 import { Table } from '../../../components/lib';
 import { TableHeader } from '../../../components/lib/Table/Table.types';
 
@@ -149,6 +150,44 @@ export const BasicSorting: Story = {
         { text: '2023-05-18' }
       ]
     ]
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Find the first sortable header
+    const headers = canvas.getAllByRole('columnheader');
+    const firstHeader = headers[0];
+    
+    // Click on the first header to sort ascending
+    await userEvent.click(firstHeader);
+    
+    // Get the rows after first sort
+    let rows = canvas.getAllByRole('row').slice(1); // Skip header row
+    let firstCellTexts = rows.map(row => within(row).getAllByRole('cell')[0].textContent);
+    
+    // Verify initial sort (should be ascending)
+    expect(firstCellTexts[0]).toBe('Laptop Pro');
+    
+    // Click on the first header again to sort descending
+    await userEvent.click(firstHeader);
+    
+    // Get updated rows
+    rows = canvas.getAllByRole('row').slice(1);
+    firstCellTexts = rows.map(row => within(row).getAllByRole('cell')[0].textContent);
+    
+    // Verify reverse sort
+    expect(firstCellTexts[0]).toBe('Wireless Keyboard');
+    
+    // Test sorting a different column
+    const secondHeader = headers[1];
+    await userEvent.click(secondHeader);
+    
+    // Verify sort by second column
+    rows = canvas.getAllByRole('row').slice(1);
+    const secondCellTexts = rows.map(row => within(row).getAllByRole('cell')[1].textContent);
+    
+    // Check that sorting works for each column
+    expect(secondCellTexts[0]).toContain('Accessories');
   }
 };
 

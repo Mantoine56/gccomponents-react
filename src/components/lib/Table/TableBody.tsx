@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import './TableBody.css';
 import { TableCell } from './Table.types';
 
@@ -68,10 +68,72 @@ export interface TableBodyProps {
 }
 
 /**
+ * Row component for better performance with memoization
+ */
+const TableRow = memo(({ 
+  row, 
+  rowIndex, 
+  selectable, 
+  isSelected, 
+  firstCellIsHeader, 
+  onSelect 
+}: { 
+  row: TableCell[]; 
+  rowIndex: number; 
+  selectable?: boolean; 
+  isSelected?: boolean; 
+  firstCellIsHeader?: boolean; 
+  onSelect?: (rowIndex: number) => void; 
+}) => {
+  return (
+    <tr 
+      className={`gcds-table__row ${isSelected ? 'gcds-table__row--selected' : ''}`}
+      aria-selected={isSelected}
+    >
+      {/* Selection checkbox */}
+      {selectable && (
+        <td className="gcds-table__cell gcds-table__checkbox-cell">
+          <input
+            type="checkbox"
+            className="gcds-table__checkbox"
+            checked={isSelected}
+            onChange={() => onSelect?.(rowIndex)}
+            aria-label={`Select row ${rowIndex + 1}`}
+          />
+        </td>
+      )}
+      
+      {/* Render row cells */}
+      {row.map((cell, cellIndex) => {
+        const CellTag = firstCellIsHeader && cellIndex === 0 ? 'th' : 'td';
+        const scope = firstCellIsHeader && cellIndex === 0 ? 'row' : undefined;
+        
+        return (
+          <CellTag
+            key={cell.id || `cell-${rowIndex}-${cellIndex}`}
+            scope={scope}
+            className="gcds-table__cell"
+            data-label={firstCellIsHeader && cellIndex > 0 ? row[0].text : undefined}
+          >
+            {cell.html ? (
+              <span dangerouslySetInnerHTML={{ __html: cell.html }} />
+            ) : (
+              cell.text
+            )}
+          </CellTag>
+        );
+      })}
+    </tr>
+  );
+});
+
+TableRow.displayName = 'TableRow';
+
+/**
  * TableBody component for rendering the body of a table
  * This component handles row rendering, selection, and empty states
  */
-export const TableBodyComponent: React.FC<TableBodyProps> = ({
+export const TableBodyComponent: React.FC<TableBodyProps> = memo(({
   rows,
   selectable = false,
   selectedRows = [],
@@ -101,72 +163,50 @@ export const TableBodyComponent: React.FC<TableBodyProps> = ({
     );
   }
   
+  // Calculate row indices based on pagination
+  const getRowIndex = (index: number): number => {
+    return hasPagination ? (currentPage - 1) * itemsPerPage + index : index;
+  };
+  
+  // Check if a row is selected
+  const isRowSelected = (index: number): boolean => {
+    return selectedRows.includes(getRowIndex(index));
+  };
+  
   return (
-    <tbody className="gcds-table__body">
-      {rows.map((row, rowIndex) => {
-        const absoluteRowIndex = hasPagination 
-          ? (currentPage - 1) * itemsPerPage + rowIndex 
-          : rowIndex;
-        const isSelected = selectedRows.includes(absoluteRowIndex);
-        const rowClassNames = [
-          'gcds-table__row',
-          isStriped && rowIndex % 2 !== 0 ? 'gcds-table__row--striped' : '',
-          isSelected ? 'gcds-table__row--selected' : '',
-        ].filter(Boolean).join(' ');
-        
-        return (
-          <tr
-            key={`row-${rowIndex}`} 
-            className={rowClassNames}
-            onClick={selectable && onRowSelect ? () => onRowSelect(absoluteRowIndex) : undefined}
-            aria-selected={isSelected ? 'true' : undefined}
-          >
-            {selectable && (
-              <td className="gcds-table__cell gcds-table__cell--selection">
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={() => onRowSelect && onRowSelect(absoluteRowIndex)}
-                  aria-label={`Select row ${absoluteRowIndex + 1}`}
-                  onClick={(e) => e.stopPropagation()} // Prevent row click from triggering twice
-                />
-              </td>
-            )}
-            {row.map((cell, cellIndex) => {
-              // If firstCellIsHeader is true and this is the first cell in the row, render as th
-              if (firstCellIsHeader && cellIndex === 0) {
-                return (
-                  <th
-                    key={`cell-${rowIndex}-${cellIndex}`}
-                    scope="row"
-                    className="gcds-table__header"
-                  >
-                    {cell.html ? (
-                      <span dangerouslySetInnerHTML={{ __html: cell.html }} />
-                    ) : (
-                      cell.text
-                    )}
-                  </th>
-                );
-              }
-              
-              // Otherwise render as td
-              return (
-                <td
-                  key={`cell-${rowIndex}-${cellIndex}`}
-                  className="gcds-table__cell"
-                >
-                  {cell.html ? (
-                    <span dangerouslySetInnerHTML={{ __html: cell.html }} />
-                  ) : (
-                    cell.text
-                  )}
-                </td>
-              );
-            })}
-          </tr>
-        );
-      })}
+    <tbody className={`gcds-table__body ${isStriped ? 'gcds-table__body--striped' : ''}`}>
+      {rows.map((row, index) => (
+        <TableRow
+          key={`row-${getRowIndex(index)}`}
+          row={row}
+          rowIndex={getRowIndex(index)}
+          selectable={selectable}
+          isSelected={isRowSelected(index)}
+          firstCellIsHeader={firstCellIsHeader}
+          onSelect={onRowSelect}
+        />
+      ))}
     </tbody>
   );
-}; 
+}, (prevProps, nextProps) => {
+  // Custom comparison function to determine if the component should re-render
+  
+  // Check if rows data changed (reference equality)
+  if (prevProps.rows !== nextProps.rows) return false;
+  
+  // Check if selected rows changed
+  if (
+    prevProps.selectedRows.length !== nextProps.selectedRows.length ||
+    !prevProps.selectedRows.every((row, i) => row === nextProps.selectedRows[i])
+  ) return false;
+  
+  // Check if pagination state changed
+  if (
+    prevProps.hasPagination !== nextProps.hasPagination ||
+    prevProps.currentPage !== nextProps.currentPage ||
+    prevProps.itemsPerPage !== nextProps.itemsPerPage
+  ) return false;
+  
+  // If we get here, nothing important changed, so we can skip re-rendering
+  return true;
+}); 

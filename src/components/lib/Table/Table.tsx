@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './TableBase.css';
 import './TableHeader.css';
 import './TableBody.css';
@@ -13,7 +13,8 @@ import {
   filterRows, 
   getPaginatedRows, 
   getEffectiveColumnCount as getColumnCount,
-  areAllRowsSelected
+  areAllRowsSelected,
+  TableLogger
 } from './tableUtils';
 
 /**
@@ -67,6 +68,11 @@ export const Table: React.FC<TableProps> = ({
   hasHeaderFilters = false,
   filterableHeaders,
 }) => {
+  // Validate table data
+  if (!TableLogger.validateTableData(headers, rows)) {
+    TableLogger.warn('Table rendered with invalid data structure');
+  }
+  
   // State for internal pagination when not controlled externally
   const [internalCurrentPage, setInternalCurrentPage] = useState(externalCurrentPage || 1);
   
@@ -82,15 +88,27 @@ export const Table: React.FC<TableProps> = ({
   // State for temporary filter values (before applying)
   const [tempFilterValue, setTempFilterValue] = useState<string>('');
   
-  // Use either controlled or uncontrolled current page
-  const activePage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
+  // Use either controlled or uncontrolled current page and selection
+  const activePage = useMemo(() => 
+    externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage, 
+    [externalCurrentPage, internalCurrentPage]
+  );
   
-  // Use either controlled or uncontrolled selected rows
-  const activeSelectedRows = externalSelectedRows !== undefined ? externalSelectedRows : internalSelectedRows;
+  const activeSelectedRows = useMemo(() => 
+    externalSelectedRows !== undefined ? externalSelectedRows : internalSelectedRows,
+    [externalSelectedRows, internalSelectedRows]
+  );
   
   // Calculate total pages
-  const effectiveTotalItems = totalItems !== undefined ? totalItems : rows.length;
-  const totalPages = Math.ceil(effectiveTotalItems / itemsPerPage);
+  const effectiveTotalItems = useMemo(() => 
+    totalItems !== undefined ? totalItems : rows.length, 
+    [totalItems, rows.length]
+  );
+  
+  const totalPages = useMemo(() => 
+    Math.ceil(effectiveTotalItems / itemsPerPage), 
+    [effectiveTotalItems, itemsPerPage]
+  );
   
   // Update internal page when external page changes
   useEffect(() => {
@@ -106,8 +124,27 @@ export const Table: React.FC<TableProps> = ({
     }
   }, [externalSelectedRows]);
   
+  // Memoize filtered rows to prevent unnecessary filtering
+  const filteredRows = useMemo(() => {
+    // Only apply filtering if enabled or if there are header filters
+    if (!isFilterable && !hasHeaderFilters) {
+      return rows;
+    }
+    return filterRows(rows, filterValues, filterCaseSensitive);
+  }, [rows, filterValues, filterCaseSensitive, isFilterable, hasHeaderFilters]);
+  
+  // Get visible rows based on pagination and filters
+  const getVisibleRows = useCallback(() => {
+    return getPaginatedRows(
+      filteredRows,
+      hasPagination,
+      activePage,
+      itemsPerPage
+    );
+  }, [filteredRows, hasPagination, activePage, itemsPerPage]);
+  
   // Function to handle page changes
-  const handlePageChange = (pageNumber: number) => {
+  const handlePageChange = useCallback((pageNumber: number) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     
     setInternalCurrentPage(pageNumber);
@@ -116,50 +153,27 @@ export const Table: React.FC<TableProps> = ({
     if (onPageChange) {
       onPageChange(pageNumber);
     }
-  };
+  }, [totalPages, onPageChange]);
   
-  // Function to handle click outside filter dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (activeFilterColumn !== null) {
-        const target = event.target as HTMLElement;
-        const filterDropdown = document.querySelector('.gcds-table__filter-dropdown');
-        
-        // Don't close if clicking within the dropdown
-        if (filterDropdown && !filterDropdown.contains(target) && 
-            !target.classList.contains('gcds-table__header-filter-icon')) {
-          setActiveFilterColumn(null);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [activeFilterColumn]);
-  
-  // Get visible rows based on pagination and filtering
-  const getVisibleRows = () => {
-    // Apply filtering if enabled and there are filter values
-    const filteredRows = (isFilterable || hasHeaderFilters) 
-      ? filterRows(rows, filterValues, filterCaseSensitive)
-      : rows;
-    
-    // Then apply pagination
-    return getPaginatedRows(filteredRows, hasPagination, activePage, itemsPerPage);
-  };
-  
-  // Handle sort
-  const handleSort = (columnIndex: number, header: TableHeader) => {
+  // Function to handle sorting
+  const handleSort = useCallback((columnIndex: number, header: TableHeader) => {
     if (!header.sortable || !onSort) return;
-
-    const newDirection = header.sortDirection === 'asc' ? 'desc' : 'asc';
+    
+    const currentDirection = header.sortDirection || 'none';
+    let newDirection: 'asc' | 'desc';
+    
+    // Toggle sort direction
+    if (currentDirection === 'none' || currentDirection === 'desc') {
+      newDirection = 'asc';
+    } else {
+      newDirection = 'desc';
+    }
+    
     onSort(columnIndex, newDirection);
-  };
+  }, [onSort]);
   
   // This handles row selection checkboxes
-  const handleRowSelect = (rowIndex: number) => {
+  const handleRowSelect = useCallback((rowIndex: number) => {
     if (!selectable) return;
     
     let newSelectedRows = [...internalSelectedRows];
@@ -178,10 +192,10 @@ export const Table: React.FC<TableProps> = ({
     
     setInternalSelectedRows(newSelectedRows);
     onRowSelect?.(newSelectedRows);
-  };
+  }, [selectable, selectionType, internalSelectedRows, onRowSelect]);
   
   // Handle select all rows
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (!selectable || selectionType === 'single') return;
     
     const visibleRows = getVisibleRows();
@@ -200,27 +214,37 @@ export const Table: React.FC<TableProps> = ({
     if (onRowSelect) {
       onRowSelect(newSelectedRows);
     }
-  };
-
+  }, [
+    selectable, 
+    selectionType, 
+    getVisibleRows, 
+    hasPagination, 
+    activePage, 
+    itemsPerPage, 
+    activeSelectedRows,
+    onRowSelect
+  ]);
+  
   // Function to calculate the total number of columns including selection column
-  const getEffectiveColumnCount = (): number => {
+  const getEffectiveColumnCount = useCallback((): number => {
     return getColumnCount(headers.length, selectable);
-  };
-
+  }, [headers.length, selectable]);
+  
   // Handle filter icon click
-  const toggleFilterDropdown = (columnIndex: number, event: React.MouseEvent) => {
+  const toggleFilterDropdown = useCallback((columnIndex: number, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent sort from triggering if header is also sortable
     
-    if (activeFilterColumn === columnIndex) {
-      setActiveFilterColumn(null);
-    } else {
-      setActiveFilterColumn(columnIndex);
+    setActiveFilterColumn(prevColumn => 
+      prevColumn === columnIndex ? null : columnIndex
+    );
+    
+    if (activeFilterColumn !== columnIndex) {
       setTempFilterValue(filterValues[columnIndex] || '');
     }
-  };
-
+  }, [activeFilterColumn, filterValues]);
+  
   // Apply filter from dropdown
-  const applyFilter = () => {
+  const applyFilter = useCallback(() => {
     if (activeFilterColumn !== null) {
       const newFilterValues = { ...filterValues };
       
@@ -238,10 +262,10 @@ export const Table: React.FC<TableProps> = ({
         onFilter(newFilterValues);
       }
     }
-  };
-
+  }, [activeFilterColumn, filterValues, tempFilterValue, onFilter]);
+  
   // Clear filter for specific column
-  const clearColumnFilter = () => {
+  const clearColumnFilter = useCallback(() => {
     if (activeFilterColumn !== null) {
       const newFilterValues = { ...filterValues };
       delete newFilterValues[activeFilterColumn];
@@ -255,10 +279,10 @@ export const Table: React.FC<TableProps> = ({
         onFilter(newFilterValues);
       }
     }
-  };
-
+  }, [activeFilterColumn, filterValues, onFilter]);
+  
   // Create table headers
-  const renderHeaders = () => {
+  const renderHeaders = useCallback(() => {
     const visibleRows = getVisibleRows();
     const allSelected = areAllRowsSelected(
       visibleRows, 
@@ -289,10 +313,31 @@ export const Table: React.FC<TableProps> = ({
         onTempFilterValueChange={setTempFilterValue}
       />
     );
-  };
-
+  }, [
+    getVisibleRows, 
+    activeSelectedRows, 
+    hasPagination, 
+    activePage, 
+    itemsPerPage,
+    headers,
+    selectable,
+    selectionType,
+    lang,
+    hasHeaderFilters,
+    filterableHeaders,
+    filterValues,
+    activeFilterColumn,
+    tempFilterValue,
+    filterPlaceholder,
+    handleSelectAll,
+    handleSort,
+    toggleFilterDropdown,
+    applyFilter,
+    clearColumnFilter
+  ]);
+  
   // Render table rows with proper classes for selection state
-  const renderRows = () => {
+  const renderRows = useCallback(() => {
     return (
       <TableBodyComponent
         rows={getVisibleRows()}
@@ -309,10 +354,23 @@ export const Table: React.FC<TableProps> = ({
         getEffectiveColumnCount={getEffectiveColumnCount}
       />
     );
-  };
-
+  }, [
+    getVisibleRows,
+    selectable,
+    activeSelectedRows,
+    isStriped,
+    firstCellIsHeader,
+    hasPagination,
+    activePage,
+    itemsPerPage,
+    emptyStateMessage,
+    emptyStateRenderer,
+    handleRowSelect,
+    getEffectiveColumnCount
+  ]);
+  
   // Render pagination controls
-  const renderPagination = () => {
+  const renderPagination = useCallback(() => {
     // Don't render pagination if there's only one page
     if (!hasPagination || totalPages <= 1) return null;
     
@@ -324,48 +382,79 @@ export const Table: React.FC<TableProps> = ({
         onPageChange={handlePageChange}
       />
     );
-  };
-
+  }, [hasPagination, totalPages, activePage, lang, handlePageChange]);
+  
   // Build table classes based on props
-  const tableClasses = [
-    'gcds-table',
-    hasHorizontalBorders && 'gcds-table--horizontal-borders',
-    hasVerticalBorders && 'gcds-table--vertical-borders',
-    hasCellBorders && 'gcds-table--cell-borders',
-    isStriped && 'gcds-table--striped',
-    isResponsive && 'gcds-table--responsive',
-    density !== 'default' && `gcds-table--${density}`,
-    isDataTable && 'gcds-table--data-table',
-    
-    // New classes based on new props
-    hasShadow && 'gcds-table--shadow',
-    hasStripedColumns && 'gcds-table--striped-columns',
-    color && `gcds-table--${color}`,
-    hasHoverEffect && 'gcds-table--hover',
-    isCardStyle && 'gcds-table--card',
-    stackOnMobile && 'gcds-table--stack',
-  ].filter(Boolean).join(' ');
-
+  const tableClasses = useMemo(() => {
+    return [
+      'gcds-table',
+      hasHorizontalBorders && 'gcds-table--horizontal-borders',
+      hasVerticalBorders && 'gcds-table--vertical-borders',
+      hasCellBorders && 'gcds-table--cell-borders',
+      isStriped && 'gcds-table--striped',
+      isResponsive && 'gcds-table--responsive',
+      density !== 'default' && `gcds-table--${density}`,
+      isDataTable && 'gcds-table--data-table',
+      
+      // New classes based on new props
+      hasShadow && 'gcds-table--shadow',
+      hasStripedColumns && 'gcds-table--striped-columns',
+      color && `gcds-table--${color}`,
+      hasHoverEffect && 'gcds-table--hover',
+      isCardStyle && 'gcds-table--card',
+      stackOnMobile && 'gcds-table--stack',
+    ].filter(Boolean).join(' ');
+  }, [
+    hasHorizontalBorders,
+    hasVerticalBorders,
+    hasCellBorders,
+    isStriped,
+    isResponsive,
+    density,
+    isDataTable,
+    hasShadow,
+    hasStripedColumns,
+    color,
+    hasHoverEffect,
+    isCardStyle,
+    stackOnMobile
+  ]);
+  
   // Table wrapper classes for responsive behavior
   const wrapperClasses = 'gcds-table-wrapper';
-
-  return (
-    <div className={wrapperClasses} data-lang={lang}>
-      {/* Top pagination if enabled */}
-      {hasPagination && (paginationPosition === 'top' || paginationPosition === 'both') && renderPagination()}
-      
-      <table className={tableClasses}>
-        {caption && (
-          <caption className={captionClasses || 'gcds-table__caption'}>
-            {caption}
-          </caption>
-        )}
-        {headers.length > 0 && renderHeaders()}
-        {renderRows()}
-      </table>
-      
-      {/* Bottom pagination if enabled */}
-      {hasPagination && (paginationPosition === 'bottom' || paginationPosition === 'both') && renderPagination()}
-    </div>
-  );
+  
+  try {
+    return (
+      <div className={wrapperClasses} data-lang={lang}>
+        {/* Top pagination if enabled */}
+        {hasPagination && (paginationPosition === 'top' || paginationPosition === 'both') && renderPagination()}
+        
+        <table className={tableClasses}>
+          {caption && (
+            <caption className={captionClasses || 'gcds-table__caption'}>
+              {caption}
+            </caption>
+          )}
+          {headers.length > 0 && renderHeaders()}
+          {renderRows()}
+        </table>
+        
+        {/* Bottom pagination if enabled */}
+        {hasPagination && (paginationPosition === 'bottom' || paginationPosition === 'both') && renderPagination()}
+      </div>
+    );
+  } catch (error) {
+    TableLogger.handleError(error, (
+      <div className="gcds-table-error">
+        <p>Error rendering table: {error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
+    ), 'Error rendering Table component');
+    
+    // Return a simplified error fallback UI
+    return (
+      <div className="gcds-table-error-container">
+        <p>An error occurred while rendering the table.</p>
+      </div>
+    );
+  }
 };

@@ -1,8 +1,15 @@
 # GC Design System Extended Component Library
 
-This project extends the [GC Design System Components](https://github.com/cds-snc/gcds-components) to provide additional React components that follow the Government of Canada design system guidelines.
+## Recent Improvements
+
+- **Unit Testing**: Added comprehensive test suite for the Table component using Vitest and Testing Library
+- **Color Theming**: Fixed color variables to align with the GC Design System color palette
+- **Responsive Design**: Enhanced mobile experience with improved horizontal scrolling
+- **Documentation**: Updated README with detailed information about the refactoring and testing
 
 ## Overview
+
+This project extends the [GC Design System Components](https://github.com/cds-snc/gcds-components) to provide additional React components that follow the Government of Canada design system guidelines.
 
 This component library builds upon the official GC Design System to provide:
 
@@ -158,7 +165,39 @@ import { Table } from './components/lib';
 
 Future improvements could include:
 
-1. **Unit Tests**: Adding comprehensive unit tests for each component
+1. **Unit Tests**: ✅ Completed
 2. **Performance Optimization**: Reducing unnecessary re-renders
 3. **Accessibility Improvements**: Enhancing keyboard navigation and screen reader support
 4. **Additional Features**: Adding new features like row expansion, column resizing, etc.
+
+## Testing
+
+The Table component now includes a comprehensive test suite using Vitest and Testing Library. The tests cover:
+
+- **Table.test.tsx**: Tests for the main Table component, including structure and styling
+- **TableHeader.test.tsx**: Tests for the header component, including sortable headers
+- **TableBody.test.tsx**: Tests for the body component, including row rendering and selection
+- **TablePagination.test.tsx**: Tests for pagination functionality
+
+### Running Tests
+
+To run the tests:
+
+```bash
+npm run test
+```
+
+### Test Coverage
+
+The tests cover the following aspects:
+
+1. **Component Rendering**: Verifying that components render correctly with the expected structure
+2. **Functionality**: Testing interactive features like pagination, sorting, and selection
+3. **Styling**: Verifying that CSS classes are applied correctly based on props
+4. **Accessibility**: Ensuring that components are accessible to all users
+
+### Future Test Improvements
+
+1. **Increased Coverage**: Adding tests for TableFilters and other components
+2. **Integration Tests**: Testing how components work together in complex scenarios
+3. **Visual Regression Tests**: Adding tests to ensure visual consistency

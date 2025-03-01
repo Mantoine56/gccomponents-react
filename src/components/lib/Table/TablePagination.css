@@ -93,4 +93,10 @@
   height: 2.5rem;
   font-size: var(--gcds-font-sizes-text-small);
   color: var(--gcds-text-secondary);
+}
+
+/* Remove any legacy class usage */
+.gcds-table__pagination-button,
+.gcds-table__pagination-button--active {
+  display: none; /* Ensure these classes don't affect layout */
 } 

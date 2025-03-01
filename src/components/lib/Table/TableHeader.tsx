@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import './TableHeader.css';
 import { TableHeader } from './Table.types';
 import { TableFiltersComponent } from './TableFilters';
@@ -97,7 +97,7 @@ export interface TableHeaderProps {
  * TableHeader component for rendering the header row of a table
  * This component handles sorting, filtering, and selection functionality
  */
-export const TableHeaderComponent: React.FC<TableHeaderProps> = ({
+export const TableHeaderComponent: React.FC<TableHeaderProps> = memo(({
   headers,
   selectable = false,
   selectionType = 'multiple',
@@ -217,4 +217,30 @@ export const TableHeaderComponent: React.FC<TableHeaderProps> = ({
       </tr>
     </thead>
   );
-}; 
+}, (prevProps, nextProps) => {
+  // Custom comparison function to determine if the component should re-render
+  // This helps prevent unnecessary re-renders, improving performance
+  
+  // If the headers array reference has changed, we need to re-render
+  if (prevProps.headers !== nextProps.headers) return false;
+  
+  // Check if the active filter column changed
+  if (prevProps.activeFilterColumn !== nextProps.activeFilterColumn) return false;
+  
+  // Check if the selected state changed
+  if (prevProps.allRowsSelected !== nextProps.allRowsSelected) return false;
+  
+  // Check if any new filter values were added or changed
+  if (
+    Object.keys(prevProps.filterValues).length !== Object.keys(nextProps.filterValues).length ||
+    !Object.keys(prevProps.filterValues).every(key => 
+      prevProps.filterValues[parseInt(key, 10)] === nextProps.filterValues[parseInt(key, 10)]
+    )
+  ) return false;
+  
+  // Check if temporary filter value changed (when editing)
+  if (prevProps.tempFilterValue !== nextProps.tempFilterValue) return false;
+  
+  // If we get here, nothing important changed, so we can skip re-rendering
+  return true;
+}); 

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import './TablePagination.css';
+import { TableLogger } from './tableUtils';
 
 /**
  * Props for the TablePagination component
@@ -27,127 +28,154 @@ export interface TablePaginationProps {
 }
 
 /**
- * TablePagination component for rendering pagination controls
- * This component handles page navigation and pagination UI
+ * A pagination button component for reuse and better memoization
  */
-export const TablePaginationComponent: React.FC<TablePaginationProps> = ({
+const PaginationButton = memo(({ 
+  page, 
+  currentPage, 
+  label, 
+  ariaLabel, 
+  disabled = false,
+  onClick,
+  isNav = false
+}: { 
+  page: number;
+  currentPage: number;
+  label: React.ReactNode;
+  ariaLabel: string;
+  disabled?: boolean;
+  onClick: (page: number) => void;
+  isNav?: boolean;
+}) => {
+  const handleClick = useCallback(() => {
+    if (!disabled) {
+      onClick(page);
+    }
+  }, [disabled, onClick, page]);
+
+  const isActive = page === currentPage;
+  const navClass = isNav ? (page < currentPage ? 'gcds-pagination__button--prev' : 'gcds-pagination__button--next') : '';
+  const activeClass = isActive ? 'gcds-pagination__button--current' : '';
+  
+  return (
+    <li className="gcds-pagination__item">
+      <button
+        type="button"
+        className={`gcds-pagination__button ${activeClass} ${navClass}`}
+        onClick={handleClick}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-current={isActive ? 'page' : undefined}
+      >
+        {label}
+      </button>
+    </li>
+  );
+});
+
+PaginationButton.displayName = 'PaginationButton';
+
+/**
+ * TablePagination component for rendering pagination controls
+ * This component handles navigation between pages
+ */
+export const TablePaginationComponent: React.FC<TablePaginationProps> = memo(({
   currentPage,
   totalPages,
   lang = 'en',
   onPageChange,
 }) => {
-  // Don't render pagination if there's only one page
-  if (totalPages <= 1) return null;
+  // Ensure current page is within valid range
+  const validatedCurrentPage = Math.max(1, Math.min(currentPage, totalPages));
   
-  // Maximum number of page buttons to show
-  const maxPageButtons = 5;
+  // Labels for buttons based on language
+  const previousLabel = lang === 'en' ? 'Previous' : 'Précédent';
+  const nextLabel = lang === 'en' ? 'Next' : 'Suivant';
+  const paginationLabel = lang === 'en' ? 'Pagination' : 'Pagination';
   
-  // Calculate which page buttons to show
-  const pageButtons: (number | string)[] = [];
+  // Calculate which page numbers to show
+  const getVisiblePages = useCallback(() => {
+    // Always show at most 5 page numbers
+    const visibleCount = 5;
+    
+    if (totalPages <= visibleCount) {
+      // If total pages is less than or equal to visible count, show all pages
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    // Otherwise, show pages centered around current page when possible
+    let startPage = Math.max(1, validatedCurrentPage - Math.floor(visibleCount / 2));
+    let endPage = startPage + visibleCount - 1;
+    
+    // Adjust start and end page if end page exceeds total pages
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - visibleCount + 1);
+    }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  }, [totalPages, validatedCurrentPage]);
   
-  if (totalPages <= maxPageButtons) {
-    // Show all pages if there are fewer than maxPageButtons
-    for (let i = 1; i <= totalPages; i++) {
-      pageButtons.push(i);
+  // Handler for page change wrapped in useCallback
+  const handlePageChange = useCallback((page: number) => {
+    if (page < 1 || page > totalPages) {
+      TableLogger.warn(`Invalid page number: ${page}. Valid range is 1-${totalPages}.`);
+      return;
     }
-  } else {
-    // Always show first and last pages
-    // Show pages around the current page for context
-    pageButtons.push(1);
-    
-    // Calculate start and end of the middle section
-    let startPage = Math.max(2, currentPage - 1);
-    let endPage = Math.min(totalPages - 1, currentPage + 1);
-    
-    // Adjust if we're near the beginning
-    if (currentPage <= 3) {
-      endPage = Math.min(totalPages - 1, maxPageButtons - 1);
-    }
-    
-    // Adjust if we're near the end
-    if (currentPage >= totalPages - 2) {
-      startPage = Math.max(2, totalPages - (maxPageButtons - 2));
-    }
-    
-    // Add ellipsis if there's a gap after the first page
-    if (startPage > 2) {
-      pageButtons.push('ellipsis-start');
-    }
-    
-    // Add the middle pages
-    for (let i = startPage; i <= endPage; i++) {
-      pageButtons.push(i);
-    }
-    
-    // Add ellipsis if there's a gap before the last page
-    if (endPage < totalPages - 1) {
-      pageButtons.push('ellipsis-end');
-    }
-    
-    // Add the last page
-    if (totalPages > 1) {
-      pageButtons.push(totalPages);
-    }
-  }
-  
-  // Text for previous/next buttons
-  const prevText = lang === 'en' ? 'Previous' : 'Précédent';
-  const nextText = lang === 'en' ? 'Next' : 'Suivant';
-  
-  return (
-    <div className="gcds-table__pagination">
-      <div className="gcds-pagination">
-        <ul className="gcds-pagination__list">
-          {/* Previous button */}
-          <li className="gcds-pagination__item">
-            <button
-              className="gcds-pagination__button gcds-pagination__button--prev"
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              aria-label={lang === 'en' ? 'Go to previous page' : 'Aller à la page précédente'}
-            >
-              {prevText}
-            </button>
-          </li>
-          
-          {/* Page number buttons */}
-          {pageButtons.map((page, index) => {
-            if (page === 'ellipsis-start' || page === 'ellipsis-end') {
-              return (
-                <li key={`ellipsis-${index}`} className="gcds-pagination__item">
-                  <span className="gcds-pagination__ellipsis">...</span>
-                </li>
-              );
-            }
+    onPageChange(page);
+  }, [onPageChange, totalPages]);
+
+  try {
+    return (
+      <nav className="gcds-table__pagination" aria-label={paginationLabel}>
+        <div className="gcds-pagination">
+          <ul className="gcds-pagination__list">
+            {/* Previous page button */}
+            <PaginationButton
+              page={validatedCurrentPage - 1}
+              currentPage={validatedCurrentPage}
+              label={previousLabel}
+              ariaLabel={previousLabel}
+              disabled={validatedCurrentPage === 1}
+              onClick={handlePageChange}
+              isNav={true}
+            />
             
-            const pageNum = page as number;
-            return (
-              <li key={`page-${pageNum}`} className="gcds-pagination__item">
-                <button
-                  className={`gcds-pagination__button ${currentPage === pageNum ? 'gcds-pagination__button--current' : ''}`}
-                  onClick={() => onPageChange(pageNum)}
-                  aria-label={lang === 'en' ? `Go to page ${pageNum}` : `Aller à la page ${pageNum}`}
-                  aria-current={currentPage === pageNum ? 'page' : undefined}
-                >
-                  {pageNum}
-                </button>
-              </li>
-            );
-          })}
-          
-          {/* Next button */}
-          <li className="gcds-pagination__item">
-            <button
-              className="gcds-pagination__button gcds-pagination__button--next"
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              aria-label={lang === 'en' ? 'Go to next page' : 'Aller à la page suivante'}
-            >
-              {nextText}
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
+            {/* Page number buttons */}
+            {getVisiblePages().map(page => (
+              <PaginationButton
+                key={`page-${page}`}
+                page={page}
+                currentPage={validatedCurrentPage}
+                label={page}
+                ariaLabel={`${lang === 'en' ? 'Page' : 'Page'} ${page}`}
+                onClick={handlePageChange}
+              />
+            ))}
+            
+            {/* Next page button */}
+            <PaginationButton
+              page={validatedCurrentPage + 1}
+              currentPage={validatedCurrentPage}
+              label={nextLabel}
+              ariaLabel={nextLabel}
+              disabled={validatedCurrentPage === totalPages}
+              onClick={handlePageChange}
+              isNav={true}
+            />
+          </ul>
+        </div>
+      </nav>
+    );
+  } catch (error) {
+    TableLogger.handleError(error, null, 'Error rendering pagination');
+    return null;
+  }
+}, (prevProps, nextProps) => {
+  // Only re-render if relevant props change
+  return (
+    prevProps.currentPage === nextProps.currentPage &&
+    prevProps.totalPages === nextProps.totalPages &&
+    prevProps.lang === nextProps.lang
   );
-}; 
+}); 
